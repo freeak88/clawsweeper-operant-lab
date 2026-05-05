@@ -24,6 +24,7 @@ The goal is to make repeated operational knowledge inspectable before it can eve
 - `v0.4-shadow-runtime`: Shadow Runtime Reports for running approved DSL rules against Review Memory without executing actions.
 - `v0.5-shadow-metrics`: Shadow Accuracy Metrics for policy-level confidence, risk, blocked, and candidate signals.
 - `v0.6-guarded-execution`: Minimal guarded execution safe mode, limited to local `annotate_only` and `suggest_comment` decisions.
+- `v0.7-demo-report`: Local Demo Report Generator for producing Markdown and JSON reports from repository input and local records only.
 
 Validation notes live in [`docs/validation/`](docs/validation/).
 
@@ -102,6 +103,12 @@ Analyze Shadow Metrics:
 pnpm run shadow-metrics -- --reports <shadow-report-dir>
 ```
 
+Generate a local demo report:
+
+```bash
+pnpm run demo-report -- --repo https://github.com/openclaw/openclaw
+```
+
 Run Guarded Execution in dry-run mode:
 
 ```bash
@@ -137,6 +144,7 @@ Core modules:
 - [`docs/shadow-runtime.md`](docs/shadow-runtime.md)
 - [`docs/shadow-metrics.md`](docs/shadow-metrics.md)
 - [`docs/guarded-execution.md`](docs/guarded-execution.md)
+- [`docs/demo-report.md`](docs/demo-report.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)
@@ -151,6 +159,7 @@ Original ClawSweeper operational docs remain available under [`docs/`](docs/), i
 - Policy DSL execution remains dry-run/reporting-first.
 - Promotion requires explicit operator intent.
 - Shadow metrics identify candidates; they do not promote or execute policies.
+- Demo reports read local records only and make no GitHub API calls.
 - The lab does not change default ClawSweeper scheduler, apply, automerge, repair, or GitHub mutation paths.
 - Historical data quality depends on available durable records and generated state.
 

@@ -74,3 +74,13 @@ Implemented:
 - Local decision logs under `results/guarded-execution/`
 - Allowed actions limited to `annotate_only` and `suggest_comment`
 - No GitHub mutation, issue closing, PR merging, repair dispatch, or scheduler/apply/automerge behavior change
+
+## v0.7 — Demo Report Generator
+
+Implemented:
+
+- Local report generator from GitHub repo input
+- Repository normalization for HTTPS, SSH, and `owner/repo` forms
+- Local-records-only orchestration of Review Memory, Policy RFC, Policy DSL, Shadow Runtime, and Shadow Metrics artifacts
+- Markdown and JSON report output under `results/demo-report/<repo-slug>/`
+- No GitHub API calls, guarded execution, issue closing, PR merging, repair dispatch, or scheduler/apply/automerge behavior change
