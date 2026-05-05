@@ -1,608 +1,168 @@
-# 🦞🧹 ClawSweeper
-
-ClawSweeper is the conservative maintenance bot for OpenClaw repositories. It
-keeps the backlog reviewed, keeps maintainer-visible GitHub comments tidy, and
-turns narrow trusted findings into guarded repair or automerge work.
-
-The current production targets are `openclaw/openclaw`, `openclaw/clawhub`, and
-self-review for `openclaw/clawsweeper`.
-
 # ClawSweeper Operant Lab
 
-Experimental fork of ClawSweeper focused on conservative autonomous maintenance
-intelligence.
+ClawSweeper Operant Lab is an experimental fork of ClawSweeper focused on conservative autonomous maintenance intelligence. It turns repeated review and repair signals from durable ClawSweeper records into reviewable policies, dry-run evaluations, shadow metrics, and a minimal guarded execution path.
 
-This lab adds proposal-only and opt-in layers for:
+This repository is not a replacement for ClawSweeper production behavior. It is a lab for testing how an already conservative maintenance bot can learn from its own history while staying proposal-first, dry-run-first, and auditable.
 
-- Policy RFC generation
-- RFC promotion lifecycle
-- Policy DSL dry-run evaluation
-- Shadow runtime reports
-- Shadow accuracy metrics
-- Guarded execution safe mode
-- Priority scoring
-- Priority-assisted planning
-- Review memory
-- Model routing recommendations
-- Adaptive scheduler recommendations
-- Confidence scoring
+## What It Solves
 
-Safety boundary:
+Large maintenance bots repeatedly see the same operational patterns: stale labels, recurring repair causes, repeated verdicts, predictable conflict types, and safe-close evidence. Without a formal layer, that knowledge stays buried in reports and comments.
 
-- No default scheduler behavior changes
-- No GitHub mutation changes
-- No automatic issue closing
-- No automatic PR merging
-- No automatic repair dispatch
-- Apply/automerge remain unchanged unless explicitly wired in future work
-
-Validation summary:
-
-- `v0.2-policy-promotion` was validated at commit
-  `320a5684de4b50de8499837316b2f10a17a7bcbd` with Node `v24.15.0`
-  and pnpm `10.33.2`.
-- Build and `build:all` pass.
-- All new-layer tests pass.
-- Observed full-suite failures in this local Windows/Node 24 validation run are
-  documented in [`docs/validation/v0.2-policy-promotion.md`](docs/validation/v0.2-policy-promotion.md).
-
-At a high level ClawSweeper:
-
-- reviews open issues and pull requests on a schedule and on exact GitHub events
-- writes one durable markdown report per item in generated state
-- syncs one marker-backed public review comment per issue or PR, edited in place
-- closes only unchanged, high-confidence, policy-allowed proposals
-- routes maintainer commands such as `@clawsweeper review`,
-  `@clawsweeper fix`, `@clawsweeper autofix`, and `@clawsweeper automerge`
-- repairs opted-in PRs through a bounded Codex review/fix loop before merge
-- can open guarded implementation PRs for strict, reproducible bug issues
-- reviews code-bearing commits that land on target `main` branches
-- publishes dashboard, audit, repair, and activity state to
-  `openclaw/clawsweeper-state`
-
-ClawSweeper is not a generic auto-close bot. Review is proposal-only, apply is
-guarded, Codex never gets write credentials during review, and every GitHub
-mutation is rechecked against live target state immediately before it happens.
-
-## Capabilities
-
-### Issue and PR Reviews
-
-Scheduled runs scan open issues and pull requests, while target repositories can
-forward exact issue/PR events with `repository_dispatch` for low-latency
-one-item reviews. Each review writes
-`records/<repo-slug>/items/<number>.md` with the decision, evidence, proposed
-maintainer-facing comment, runtime metadata, and GitHub snapshot hash.
-
-ClawSweeper syncs one marker-backed public review comment per item and edits it
-in place instead of posting repeated comments. If a review starts before a
-completed comment exists, it first posts a short status placeholder, then
-replaces that same comment with the final review. Pull request comments include
-hidden verdict/action markers so trusted repair and automerge flows can continue
-without scraping visible prose. See
-[`docs/pr-review-comments.md`](docs/pr-review-comments.md).
-
-### Apply and State
-
-Apply mode re-fetches live GitHub state, checks labels, maintainer authorship,
-paired issue/PR state, snapshot drift, and repository profile rules before
-commenting or closing anything. Closed or already-closed reports move to
-`records/<repo-slug>/closed/<number>.md`; reopened archived items move back to
-`items/` as stale work.
-
-Generated state lives in `openclaw/clawsweeper-state`: durable `records/`,
-`jobs/`, `results/`, audit output, workflow status JSON, repair ledgers, and the
-rendered dashboard. This repository stays focused on source, workflows, docs,
-and tests.
-
-### Repair and Automerge
-
-Maintainer commands can opt PRs into `autofix` or `automerge`, dispatch a fresh
-exact-head review, and run a bounded Codex review/fix loop. Codex handles the
-code repair and local validation loop; deterministic executor steps own every
-GitHub mutation, branch push, label update, and final merge gate.
-
-Automerge waits for exact-head review, required checks, mergeability, and policy
-gates. If repair was needed, the mutable status comment records each review,
-repair, re-review, and merge step with timing and links. The final merge result
-summarizes both the original PR change and any ClawSweeper fixups.
-
-For issues, strict bug reviews that are high-confidence reproducible, do not
-already have a linked PR, and do not require feature/config expansion can
-dispatch Codex to open one guarded implementation PR labeled
-`clawsweeper:autogenerated`.
-
-### Commit Reviews
-
-Push events on target `main` branches can dispatch to
-`.github/workflows/commit-review.yml`. The workflow expands the commit range,
-skips non-code-only commits cheaply, starts one Codex worker per code-bearing
-commit, and writes `records/<repo-slug>/commits/<sha>.md`.
-
-Commit reports are the source of truth. Optional target commit Check Runs are
-disabled by default and can be enabled per run or repository. Reports with
-`result: findings` can dispatch to repair intake when the finding is narrow,
-non-security, and still relevant on latest `main`.
-
-### Operations
-
-Repository-specific rules live in `src/repository-profiles.ts`, so OpenClaw,
-ClawHub, and ClawSweeper can share the same engine while keeping different apply
-limits. Both review and repair lanes support manual workflow dispatch, reruns,
-and backfills. `pnpm commit-reports -- --since 24h`, `--findings`,
-`--non-clean`, `--repo`, and `--author` query flat per-SHA commit storage
-without date buckets.
-
-## Guardrails
-
-ClawSweeper may propose a close only when the item is clearly one of these:
-
-- implemented on current `main`
-- not reproducible on current `main`
-- better suited for ClawHub skill/plugin work than core
-- duplicate or superseded by a canonical issue/PR
-- concrete but not actionable in this source repo
-- incoherent enough that no action can be taken
-- stale issue older than 60 days with too little data to verify
-
-Maintainer-authored items are never auto-closed. Everything else stays open.
-Issues with an open PR that references them using GitHub closing syntax such as
-`Fixes #123` stay open until that PR merges or is closed.
-Open issue/PR pairs from the same author stay open together unless the paired
-item is already resolved or a maintainer explicitly asks to close one side.
-
-Repository profiles can further narrow apply. ClawHub and ClawSweeper self-review
-are intentionally stricter: they review issues and PRs, but apply may close only
-PRs where current `main` already implements the proposed change with
-source-backed evidence.
-
-## Maintainer Commands
-
-Maintainers can steer ClawSweeper from target-repo issue and PR comments. The
-preferred form is `@clawsweeper ...`. The router also accepts
-`@clawsweeper[bot] ...`, `@openclaw-clawsweeper ...`,
-`@openclaw-clawsweeper[bot] ...`, and legacy slash aliases such as
-`/clawsweeper ...`, `/review`, `/automerge`, `/auto merge`, and
-`/autoclose <reason>`.
-
-Common commands:
+Operant Lab adds a structured pipeline:
 
 ```text
-@clawsweeper status
-@clawsweeper re-review
-@clawsweeper review
-@clawsweeper fix ci
-@clawsweeper address review
-@clawsweeper rebase
-@clawsweeper autofix
-@clawsweeper automerge
-@clawsweeper approve
-@clawsweeper explain
-@clawsweeper stop
-@clawsweeper why did automerge stop here?
+records -> review memory -> policy RFC -> promotion -> policy DSL -> shadow runtime -> metrics -> guarded execution
 ```
 
-- `status` and `explain` post a short target summary.
-- `review` and `re-review` dispatch a fresh ClawSweeper issue/PR review without
-  starting repair.
-- Command status replies are marker-backed and edited in place per
-  issue/PR, intent, and head SHA. The visible badge is one lobster plus the
-  current state: `👀` for acknowledgement, `🧹` for review, `🔧` for repair, and
-  `✅` for completed/paused work.
-- Freeform `@clawsweeper ...` mentions dispatch a read-only assist review that
-  answers the maintainer request in the next ClawSweeper comment. Action-looking
-  prose still maps through existing safe markers and deterministic gates.
-- `fix ci`, `address review`, and `rebase` dispatch the repair worker only for
-  ClawSweeper PRs or PRs already opted into `clawsweeper:autofix` or
-  `clawsweeper:automerge`.
-- `autofix` labels an open PR, creates or reuses the adopted job, dispatches
-  review, and enters the bounded review/fix loop without merging.
-- `automerge` labels an open PR, creates or reuses the adopted job, dispatches
-  review, and enters the bounded review/fix/merge loop. Draft PRs are fix-only
-  until GitHub marks them ready for review.
-- User-facing OpenClaw `fix`, `feat`, and `perf` automerge PRs must include a
-  `CHANGELOG.md` entry before ClawSweeper will merge them.
-- Security-sensitive findings can be repaired only after explicit
-  `autofix`/`automerge` opt-in; ClawSweeper still will not merge until a later
-  exact-head review is clean.
-- `approve` lets a maintainer clear a ClawSweeper human-review pause and merge
-  only after the normal exact-head, checks, mergeability, and gate checks pass.
-- `stop` removes repair-loop labels, adds `clawsweeper:human-review`, and makes
-  older automerge/autofix comments ineligible to continue. `/autoclose <reason>`
-  closes the item and bounded linked same-repo targets with an explicit
-  maintainer reason.
+The goal is to make repeated operational knowledge inspectable before it can ever affect live behavior.
 
-Only maintainers are accepted. The router checks repository collaborator
-permission (`admin`, `maintain`, or `write`) and falls back to trusted
-`author_association` values when permission lookup is unavailable. Contributor
-commands are ignored without a reply. Scheduled comment routing is dry unless
-`CLAWSWEEPER_COMMENT_ROUTER_EXECUTE=1`; workflow dispatch with `execute=true`
-can be used for one-off live routing.
+## Version Timeline
 
-## Dashboard
+- `v0.1-operant-lab`: Operant layer foundation with Policy RFC generation, Priority Engine, Review Memory, Model Routing metadata, Adaptive Scheduler recommendations, and Confidence Engine.
+- `v0.2-policy-promotion`: RFC Promotion Pipeline with Draft -> Candidate -> Approved lifecycle state.
+- `v0.3-policy-dsl-dry-run`: Executable Policy DSL Dry-Run for deterministic approved policy rules.
+- `v0.4-shadow-runtime`: Shadow Runtime Reports for running approved DSL rules against Review Memory without executing actions.
+- `v0.5-shadow-metrics`: Shadow Accuracy Metrics for policy-level confidence, risk, blocked, and candidate signals.
+- `v0.6-guarded-execution`: Minimal guarded execution safe mode, limited to local `annotate_only` and `suggest_comment` decisions.
 
-Live dashboard and generated state: https://github.com/openclaw/clawsweeper-state
+Validation notes live in [`docs/validation/`](docs/validation/).
 
-## How It Works
+## Safety Model
 
-ClawSweeper is split into four operational lanes:
+Operant Lab is designed around conservative gates:
 
-- review lane: scheduled and event-driven issue/PR reviews, durable reports, and
-  public review comment sync
-- apply lane: guarded close/comment mutations, audit, reconcile, and state
-  publishing
-- repair lane: maintainer-command routing, autofix, automerge, issue
-  implementation PRs, and repair result publishing
-- commit review lane: main-branch commit dispatch, cheap code/non-code
-  classification, one Codex review worker per code-bearing commit, and optional
-  target commit checks
+- Default OFF.
+- Proposal-first.
+- Dry-run first.
+- No GitHub mutation by default.
+- No automatic issue closing.
+- No automatic PR merging.
+- No automatic repair dispatch.
+- No scheduler, apply, or automerge behavior changes by default.
+- Guarded execution supports only `annotate_only` and `suggest_comment`.
+- Guarded execution requires `CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1`.
+- Guarded execution logs every decision under `results/guarded-execution/`.
 
-### Scheduler
+Explicitly unsupported in v0.6:
 
-The issue/PR scheduler decides what to scan and how often. New and active items
-get more attention; older quiet items fall back to a slower cadence. Detailed
-scheduling, capacity, and monitoring behavior is documented in
-[`docs/scheduler.md`](docs/scheduler.md).
+- closing issues
+- merging PRs
+- dispatching repairs
+- modifying repository state
+- changing ClawSweeper scheduler/apply/automerge behavior
 
-- hot/new and recently active items are checked hourly, with a 5-minute intake
-  schedule for the newest queue edge
-- target repositories can forward issue and PR events with
-  `repository_dispatch`; those exact item runs use a dedicated single job to
-  review one item, sync the durable comment, and apply only safe close
-  proposals for that same item
-- pull requests and issues younger than 30 days are checked daily once they
-  leave the hot window
-- older inactive issues are checked weekly
-- apply wakes every 15 minutes and exits quickly when there are no unchanged
-  high-confidence close proposals
+## Quickstart
 
-### Review Lane
-
-Review is proposal-only. It never closes items.
-
-- A planner scans open issues and PRs, then assigns exact item numbers to shards.
-- Manual runs can pass `item_number` or comma-separated `item_numbers` to review
-  exact Audit Health findings without scanning for a normal batch.
-- Each shard checks out the selected target repository at `main`.
-- Codex reviews with `gpt-5.5`, high reasoning, the default service tier, and a
-  10-minute per-item timeout.
-- Each item becomes a flat report under
-  `records/<repo-slug>/items/<number>.md` with the decision, evidence,
-  Codex `/review`-style PR findings, suggested comment, runtime metadata, and
-  GitHub snapshot hash. When GitHub exposes a merged closing PR for an issue,
-  the report records that PR and the close comment links it as fix provenance.
-- High-confidence allowed close decisions become `proposed_close`.
-- After publish, the lane checks the selected items' single marker-backed Codex
-  review comment. Missing comments and missing metadata are synced immediately;
-  existing comments are refreshed only when stale, currently weekly.
-- PR review comments keep the top-level note concise, put source links and full
-  evidence in collapsed details, and use hidden verdict/action markers for the
-  trusted ClawSweeper repair loop; see
-  [`docs/pr-review-comments.md`](docs/pr-review-comments.md).
-
-### Apply Lane
-
-Apply reads existing reports and mutates GitHub only when the stored review is
-still valid.
-
-- Updates the single marker-backed Codex automated review comment in place.
-- Closes only unchanged high-confidence proposals.
-- Reuses the review comment when closing; no duplicate close comment.
-- Moves closed or already-closed reports to
-  `records/<repo-slug>/closed/<number>.md`.
-- Moves reopened archived reports back to the repo’s `items/` folder as stale.
-- Commits checkpoints and machine-readable status during long runs.
-
-Apply wakes every 15 minutes, no-ops when there are no unchanged
-high-confidence close proposals, and narrows scheduled runs to the currently
-eligible proposal list so idle runs do not scan unrelated keep-open records.
-It defaults to all item kinds, no age floor, a 2-second close delay, and 50
-fresh closes per checkpoint. If it reaches the requested limit, it queues
-another apply run with the same settings.
-
-Exact event runs skip the bulk planner, shard matrix, artifact upload, and
-separate publish job. They still use the same review and apply code paths, but
-only for the selected item number and only with immediate-safe reasons enabled
-by default: `implemented_on_main` and `duplicate_or_superseded`.
-`stale_insufficient_info` is never applied to young items; apply requires those
-issue reports to be at least 30 days old unless a manual run explicitly changes
-the threshold.
-
-The external state dashboard is fleet-scoped. Each configured repository gets
-its own record folder, status JSON, audit state, cadence counts, and recent
-activity section. The state repo aggregates those repository snapshots so event
-runs from one repo do not hide the state of another.
-
-There is still one deterministic apply path for writes. Review can propose and
-sync stale public review comments, but closing remains guarded by apply so a
-fresh GitHub snapshot, labels, maintainer-authorship, and unchanged item state
-are checked immediately before mutation.
-
-### Repair Lane
-
-Repair starts from maintainer intent or trusted ClawSweeper review metadata. The
-comment router accepts commands from target repositories, validates maintainer
-permissions, updates one mutable command/status comment, and dispatches the
-appropriate repair job.
-
-- `autofix` and `automerge` adopt the PR branch and run exact-head review before
-  making changes.
-- If review or CI finds actionable issues, Codex rebases, addresses PR review
-  comments, fixes CI, runs the requested validation, and returns a structured
-  repair artifact.
-- The deterministic executor applies the artifact, pushes only after validation,
-  re-dispatches exact-head review, and waits for required checks.
-- `automerge` merges only after review verdict, checks, mergeability, changelog,
-  security, maintainer stop/approve state, and repository policy gates pass.
-- Issue implementation is narrower: only strict, reproducible bugs with no
-  linked PR and no feature/config expansion can open a generated PR.
-
-Repair internals are documented in
-[`docs/repair/README.md`](docs/repair/README.md), and the automerge state
-machine is documented in
-[`docs/repair/automerge-flow.md`](docs/repair/automerge-flow.md).
-
-### Commit Review Lane
-
-Commit review is intentionally separate from issue/PR cleanup. It never closes
-items, writes comments, or fixes code.
-
-- Target repositories forward `push` events from `main` with
-  `repository_dispatch`.
-- Manual runs can pass `commit_sha`, optional `before_sha`, optional
-  `additional_prompt`, `enabled`, and `create_checks`.
-- The receiver verifies the selected commits are reachable from `origin/main`.
-- Before selecting and reviewing commits, the receiver waits 60 seconds by
-  default (`CLAWSWEEPER_COMMIT_REVIEW_SETTLE_SECONDS=60`) so a push range has
-  time to settle across GitHub and the runner.
-- The plan job expands ranges, pages large backfills at GitHub's matrix limit,
-  and classifies each commit before Codex starts.
-- Pure documentation, changelog, README/license, and asset-only commits get a
-  skipped report without spending Codex time.
-- Mixed commits and code-bearing commits start one Codex worker per commit. The
-  worker checks out current target `main` and reviews the selected commit by
-  SHA/range instead of detaching the whole repository at that commit.
-- Codex is prompted to read beyond the diff: changed files, callers/callees,
-  runtime entry points, adjacent tests/docs, dependency manifests, release
-  notes, advisories, web sources, and focused live tests when useful.
-- Each commit writes exactly one report at
-  `records/<repo-slug>/commits/<40-char-sha>.md`.
-- Reruns overwrite the same report, including reruns with an
-  `additional_prompt`.
-- Report results are `nothing_found`, `findings`, `inconclusive`, `failed`, or
-  `skipped_non_code`.
-- Optional GitHub Checks use the `ClawSweeper Commit Review` name on the target
-  commit. Clean or skipped reports are green; high-confidence high/critical
-  findings fail; lower-severity, inconclusive, and failed reviews are neutral.
-- Finding reports are dispatched to the repair intake when
-  `CLAWSWEEPER_COMMIT_FINDINGS_ENABLED` is not `false`. ClawSweeper owns
-  the audit log and any repair PR.
-
-Use `pnpm commit-reports -- --since 24h` to review recent reports and add
-`--findings`, `--non-clean`, `--repo`, or `--author` to narrow the list. The
-storage stays flat so a rerun can overwrite exactly one file for a commit
-without rediscovering a date bucket.
-
-### Safety Model
-
-- Maintainer-authored items are excluded from automated closes.
-- Protected labels block close proposals.
-- Open PRs with GitHub closing references block issue closes until the PR is
-  resolved.
-- Open same-author issue/PR pairs block one-sided closes.
-- Codex runs without GitHub write tokens.
-- Issue/PR event jobs create target write and report-push credentials only after
-  Codex exits.
-- Commit review workers give Codex only a read-scoped target token as `GH_TOKEN`
-  so it can inspect mentioned issues, PRs, workflow runs, and commit metadata.
-- Commit write/check credentials are created only after Codex exits.
-- CI makes the target checkout read-only for reviews.
-- Reviews fail if Codex leaves tracked or untracked changes behind.
-- Snapshot changes block apply unless the only change is the bot’s own review
-  comment.
-- Commit Check Runs are optional and disabled by default.
-
-### Audit
-
-`pnpm run audit` compares live GitHub state with generated records without moving
-files. It reports missing open records, archived open records, stale records,
-duplicates, protected-label proposed closes, and stale review-status records.
-Protected proposed closes are reported only for active repo `items/` records
-because archived repo `closed/` records are historical and cannot be applied.
-Missing open records are classified as eligible, maintainer-authored, protected,
-or recently created so strict audit mode can flag actionable drift without
-treating expected queue lag or excluded items as failures.
-Use `--update-dashboard` to publish the latest audit state under
-`results/audit/` in `openclaw/clawsweeper-state` without making every normal
-status update scan all open GitHub items. The state repo renders reviewable
-findings such as missing eligible records, reopened archived records, and stale
-reviews from that state. The
-workflow refreshes audit state on a separate six-hour schedule, and it can be run
-manually with `audit_dashboard=true`. The read-only audit lane covers
-`openclaw/openclaw`, `openclaw/clawhub`, and `openclaw/clawsweeper`; it falls
-back to public workflow-token reads when the ClawSweeper App token is not
-available for a target.
-
-## Local Run
-
-Requires Node 24.
-
-Issue/PR sweeper:
+Requires Node 24 and pnpm 10.33.2.
 
 ```bash
-source ~/.profile
 corepack enable
 pnpm install
 pnpm run build
-pnpm run plan -- --target-repo openclaw/openclaw --batch-size 5 --shard-count 70 --max-pages 250 --codex-model gpt-5.5 --codex-reasoning-effort high
-pnpm run review -- --target-repo openclaw/openclaw --target-dir ../openclaw --batch-size 5 --max-pages 250 --artifact-dir artifacts/reviews --codex-model gpt-5.5 --codex-reasoning-effort high --codex-timeout-ms 600000
-pnpm run apply-artifacts -- --target-repo openclaw/openclaw --artifact-dir artifacts/reviews --skip-dashboard
-pnpm run audit -- --target-repo openclaw/openclaw --max-pages 250 --sample-limit 25 --update-dashboard
-pnpm run reconcile -- --target-repo openclaw/openclaw --dry-run
 ```
 
-Apply unchanged proposals later:
+For a local dry-run tour, see [`docs/demo.md`](docs/demo.md).
+
+## Main Commands
+
+Build Review Memory:
 
 ```bash
-source ~/.profile
-corepack enable
-pnpm run apply-decisions -- --target-repo openclaw/openclaw --limit 20 --apply-kind all --skip-dashboard
+pnpm run review-memory -- --target-repo openclaw/openclaw
 ```
 
-Sync durable review comments without closing:
+Generate Policy RFCs:
 
 ```bash
-source ~/.profile
-corepack enable
-pnpm run apply-decisions -- --target-repo openclaw/openclaw --sync-comments-only --comment-sync-min-age-days 7 --processed-limit 1000 --limit 0 --skip-dashboard
+pnpm run policy-rfc -- --target-repo openclaw/openclaw
 ```
 
-List commit reports:
+Promote a policy proposal:
 
 ```bash
-source ~/.profile
-corepack enable
-pnpm run build
-pnpm commit-reports -- --since 24h
-pnpm commit-reports -- --since 24h --findings
-pnpm commit-reports -- --repo openclaw/openclaw --author steipete --since 7d
+pnpm run policy-promote -- --proposal <proposal.json> --to candidate --reason "repeated stable pattern"
+pnpm run policy-promote -- --proposal <proposal.json> --to approved --reason "operator approved"
 ```
 
-Manually rerun commit review through GitHub Actions:
+Run Policy DSL dry-run:
 
 ```bash
-gh workflow run commit-review.yml \
-  --repo openclaw/clawsweeper \
-  --ref main \
-  -f target_repo=openclaw/openclaw \
-  -f commit_sha=<commit-sha> \
-  -f before_sha=<parent-or-range-start-sha> \
-  -f create_checks=false \
-  -f enabled=true \
-  -f additional_prompt='Optional extra review focus.'
+pnpm run policy-dsl -- --policy <policy.json> --memory <review-memory.json>
 ```
 
-Omit `before_sha` for a single-commit review. Pass `before_sha` to review the
-historic range `before_sha..commit_sha`.
-
-Manual review runs are proposal-only. Use `apply_existing=true` to apply unchanged
-proposals later. Scheduled apply runs process both issues and pull requests by
-default, subject to the selected repository profile; pass `target_repo`,
-`apply_kind=issue`, or `apply_kind=pull_request` to narrow a manual run.
-
-Scheduled runs cover the configured product profiles. `openclaw/openclaw` runs
-normal backfill every 5 minutes with up to 70 review shards when the system is
-quiet; `openclaw/clawhub` runs on offset review/apply/audit crons so its reports
-live under `records/openclaw-clawhub/` without colliding with default repo
-records. `openclaw/clawsweeper` has a scheduled read-only audit row and is
-available for manual and event self-review smoke tests. Broad hot-intake sweeps
-cap scheduled fan-out at 35 one-item shards per run when quiet; exact event
-reviews still use one shard. Normal review, hot intake, and commit review are
-background lanes, so they shrink automatically while repair or exact-item work
-is active. Throughput defaults live in
-[docs/limits.md](docs/limits.md) and `config/automation-limits.json`.
-
-### Worker Budget
-
-ClawSweeper has one main capacity knob:
-`config/automation-limits.json` -> `workers.max`. The current value is `100`.
-Quiet-system lane limits are derived from that number: normal review gets up to
-70 shards, hot intake up to 35 shards, commit review 5 commits per page, and
-repair/issue implementation 40 live workers. Exact-item review, repair, and
-issue implementation are priority work; normal review, hot intake, and commit
-review are background work and automatically yield when priority work is active.
-Use `workers.max` first when turning total Codex usage up or down; use the
-individual environment overrides only for temporary lane-specific exceptions.
-
-Target repositories can opt into event-level latency by installing the
-dispatcher workflow in [docs/target-dispatcher.md](docs/target-dispatcher.md).
-The dispatcher sends `repository_dispatch` events to this repository with the
-target repo and exact item number; ClawSweeper then runs one event job that
-reviews, comments, and checks immediate safe apply instead of waiting for the
-next hot-intake cron or bulk publish lane.
-
-Target repositories can opt into main-branch commit review with
-[docs/commit-dispatcher.md](docs/commit-dispatcher.md). That dispatcher sends
-push ranges to this repository, where ClawSweeper expands the range and writes
-one commit report per SHA.
-
-## Checks
+Run Shadow Runtime:
 
 ```bash
-pnpm run check
-pnpm run oxformat
+pnpm run shadow-runtime -- --policies <policy-dir> --memory <review-memory.json>
 ```
 
-`oxformat` is an alias for `oxfmt`; there is no separate `oxformat` pnpm package.
-The `CI` GitHub Actions workflow uses the latest Node release and runs
-`pnpm run check` on pushes, pull requests, and manual dispatches. The check gate
-includes the full test suite, a strict changed-surface coverage threshold, and a
-full compiled-repo coverage ratchet.
+Analyze Shadow Metrics:
 
-## GitHub Actions Setup
+```bash
+pnpm run shadow-metrics -- --reports <shadow-report-dir>
+```
 
-Required secrets:
+Run Guarded Execution in dry-run mode:
 
-- `OPENAI_API_KEY`: OpenAI API key used by the per-job local Codex Responses
-  proxy. Codex subprocesses inherit only the proxy-backed `CODEX_HOME`, not the
-  raw API key.
-- `CLAWSWEEPER_APP_CLIENT_ID`: public GitHub App client ID for `clawsweeper`.
-  Currently `Iv23liOECG0slfuhz093`.
-- `CLAWSWEEPER_APP_PRIVATE_KEY`: private key for `clawsweeper`; plan/review
-  jobs use a short-lived GitHub App installation token for read-heavy target API
-  calls, commit review uses a read-scoped target token while Codex runs, and
-  apply/comment-sync/check jobs use the app token for comments, closes, and
-  optional checks.
-  Keep App credentials scoped to the `actions/create-github-app-token` step.
-  Review shards run Codex over attacker-controlled issue/PR text, so
-  `codexEnv()` also strips these App variables before spawning Codex.
+```bash
+pnpm run guarded-execution -- \
+  --policy <policy.json> \
+  --metrics <shadow-metrics.json> \
+  --confidence <confidence.json> \
+  --item-number 42 \
+  --dry-run true
+```
 
-Token flow:
+Run Guarded Execution safe mode for local annotation decisions:
 
-- Review and repair jobs create an isolated per-run `CODEX_HOME`, start a local
-  Responses proxy from `OPENAI_API_KEY`, write proxy-only Codex config there,
-  and run Codex without OpenAI or Codex token environment variables.
-- ClawSweeper uses the `clawsweeper` GitHub App token for read-heavy target
-  context.
-- Apply mode uses the same app token for review comments and closes, so GitHub
-  attributes mutations to the app bot account instead of a PAT user.
-- Commit review passes Codex only a read-scoped target token as `GH_TOKEN` for
-  issue/PR/workflow/commit hydration, then creates write/check credentials only
-  after Codex exits.
-- The ClawSweeper GitHub App commits generated reports back to
-  `openclaw/clawsweeper-state`.
+```bash
+CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1 pnpm run guarded-execution -- \
+  --policy <policy.json> \
+  --metrics <shadow-metrics.json> \
+  --confidence <confidence.json> \
+  --item-number 42 \
+  --dry-run false
+```
 
-Required `clawsweeper` app permissions:
+## Architecture
 
-- Contents: read/write, for report commits, repair branches, and repository
-  dispatch inputs that need a contents-scoped installation token.
-- Issues: read/write, for issue comments, labels, closes, and maintainer command
-  authorization context.
-- Pull requests: read/write, for PR comments, labels, merge readiness, repair PRs,
-  and guarded automerge.
-- Workflows: write, for adopted automerge repairs that need to rebase or update
-  source branches containing `.github/workflows/*` changes.
-- Actions: read/write on `openclaw/clawsweeper`, for run cancellation, manual
-  dispatch, self-heal, and commit-review continuations.
-- Checks: write on target repositories when commit Check Runs should be
-  published.
+The high-level architecture is documented in [`docs/architecture.md`](docs/architecture.md).
 
-ClawSweeper no longer falls back to PAT-based write tokens. If the GitHub App
-installation does not grant the requested permission set, the workflow fails at
-token creation instead of silently switching identity.
+Core modules:
 
-Target repository setup:
+- [`docs/review-memory.md`](docs/review-memory.md)
+- [`docs/policy-rfc-engine.md`](docs/policy-rfc-engine.md)
+- [`docs/policy-promotion.md`](docs/policy-promotion.md)
+- [`docs/policy-dsl.md`](docs/policy-dsl.md)
+- [`docs/shadow-runtime.md`](docs/shadow-runtime.md)
+- [`docs/shadow-metrics.md`](docs/shadow-metrics.md)
+- [`docs/guarded-execution.md`](docs/guarded-execution.md)
+- [`docs/confidence-engine.md`](docs/confidence-engine.md)
+- [`docs/priority-engine.md`](docs/priority-engine.md)
+- [`docs/model-routing.md`](docs/model-routing.md)
+- [`docs/adaptive-scheduler.md`](docs/adaptive-scheduler.md)
 
-- install the issue/PR dispatcher from
-  [docs/target-dispatcher.md](docs/target-dispatcher.md) for exact item event
-  reviews
-- install the commit dispatcher from
-  [docs/commit-dispatcher.md](docs/commit-dispatcher.md) for `main` commit
-  reviews
-- set `CLAWSWEEPER_COMMIT_REVIEW_ENABLED=false` to disable commit dispatch
-  without code changes
-- set `CLAWSWEEPER_COMMIT_REVIEW_CREATE_CHECKS=true` only if commit Check Runs
-  should be published
-- optionally set `CLAWSWEEPER_COMMIT_REVIEW_SETTLE_SECONDS=0` for manual
-  backfills where the target commit range is already settled; the default is
-  `60`
+Original ClawSweeper operational docs remain available under [`docs/`](docs/), including scheduler and repair internals.
+
+## Current Limitations
+
+- Guarded execution does not publish GitHub comments; it writes local decision logs only.
+- Only `annotate_only` and `suggest_comment` are allowed in guarded execution.
+- Policy DSL execution remains dry-run/reporting-first.
+- Promotion requires explicit operator intent.
+- Shadow metrics identify candidates; they do not promote or execute policies.
+- The lab does not change default ClawSweeper scheduler, apply, automerge, repair, or GitHub mutation paths.
+- Historical data quality depends on available durable records and generated state.
+
+## Roadmap
+
+Near-term work should stay conservative:
+
+- richer sample fixtures and demo datasets
+- operator review UI or report bundles for promoted policies
+- stricter schema validation for policy DSL and confidence inputs
+- optional comment-publication experiments behind separate flags
+- manual approval gates before any broader guarded execution
+- continued proof that scheduler/apply/automerge behavior remains unchanged unless explicitly wired
+
+The detailed roadmap is in [`docs/roadmap.md`](docs/roadmap.md).
