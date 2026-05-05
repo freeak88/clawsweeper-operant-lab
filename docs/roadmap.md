@@ -44,9 +44,15 @@ Implemented:
 - Dry-run reports under `results/policy-dsl-dry-run/`
 - No policy execution or scheduler/apply/automerge mutation wiring
 
-## v0.4 — Runtime Model Routing
+## v0.4 — Shadow Runtime Reports
 
-Use routing metadata to select model/reasoning per item.
+Implemented:
+
+- Approved Policy DSL rules evaluated against Review Memory records
+- Reporting-only shadow matches and action counts
+- Confidence metadata attached to would-propose matches
+- Local CLI command for shadow report generation
+- No policy execution or scheduler/apply/automerge mutation wiring
 
 ## v0.5 — Adaptive Scheduler Runtime
 
