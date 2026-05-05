@@ -20,6 +20,7 @@
     "policy-dsl": "node dist/policy-dsl/index.js",
     "shadow-runtime": "node dist/shadow-runtime/index.js",
     "shadow-metrics": "node dist/shadow-metrics/index.js",
+    "guarded-execution": "node dist/guarded-execution/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",

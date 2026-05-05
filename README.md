@@ -19,6 +19,7 @@ This lab adds proposal-only and opt-in layers for:
 - Policy DSL dry-run evaluation
 - Shadow runtime reports
 - Shadow accuracy metrics
+- Guarded execution safe mode
 - Priority scoring
 - Priority-assisted planning
 - Review memory

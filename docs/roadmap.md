@@ -64,6 +64,13 @@ Implemented:
 - Local CLI command for metrics generation
 - No policy execution or scheduler/apply/automerge mutation wiring
 
-## v0.6 — Confidence-Gated Actions
+## v0.6 — Guarded Execution
 
-Carefully test confidence-gated apply/automerge behavior behind strict flags.
+Implemented:
+
+- Minimal opt-in guarded execution engine
+- `CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1` safety flag
+- Dry-run support for every decision
+- Local decision logs under `results/guarded-execution/`
+- Allowed actions limited to `annotate_only` and `suggest_comment`
+- No GitHub mutation, issue closing, PR merging, repair dispatch, or scheduler/apply/automerge behavior change
