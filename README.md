@@ -34,9 +34,13 @@ Safety boundary:
 
 Validation summary:
 
-- Build passes
-- Targeted tests for all new modules pass
-- Local environment uses Node v22.19.0 while package declares Node >=24
+- `v0.2-policy-promotion` was validated at commit
+  `320a5684de4b50de8499837316b2f10a17a7bcbd` with Node `v24.15.0`
+  and pnpm `10.33.2`.
+- Build and `build:all` pass.
+- All new-layer tests pass.
+- Observed full-suite failures in this local Windows/Node 24 validation run are
+  documented in [`docs/validation/v0.2-policy-promotion.md`](docs/validation/v0.2-policy-promotion.md).
 
 At a high level ClawSweeper:
 
