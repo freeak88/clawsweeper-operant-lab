@@ -17,6 +17,7 @@
     "status": "node dist/clawsweeper.js status",
     "policy-rfc": "node dist/policy-rfc/index.js",
     "policy-promote": "node dist/policy-promotion/index.js",
+    "policy-dsl": "node dist/policy-dsl/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",

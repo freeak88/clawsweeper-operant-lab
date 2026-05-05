@@ -34,9 +34,15 @@ Validation:
 - No scheduler, apply, automerge, repair dispatch, or GitHub mutation behavior
   was changed.
 
-## v0.3 — Executable Policy DSL
+## v0.3 — Executable Policy DSL Dry-Run
 
-Convert approved policies into deterministic rules.
+Implemented:
+
+- Deterministic JSON policy DSL for approved policies
+- Dry-run evaluator for review-memory or record-derived item objects
+- Local CLI command for historical evaluation
+- Dry-run reports under `results/policy-dsl-dry-run/`
+- No policy execution or scheduler/apply/automerge mutation wiring
 
 ## v0.4 — Runtime Model Routing
 

@@ -16,6 +16,7 @@ This lab adds proposal-only and opt-in layers for:
 
 - Policy RFC generation
 - RFC promotion lifecycle
+- Policy DSL dry-run evaluation
 - Priority scoring
 - Priority-assisted planning
 - Review memory
