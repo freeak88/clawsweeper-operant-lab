@@ -28,7 +28,12 @@ import {
   parseGhJson,
   parseGhJsonLines,
   parseDecision,
+  adaptiveSchedulerRecommendationForTest,
+  planCandidatesOutputForTest,
+  planCandidatesOutputWithConfidenceForTest,
+  planCandidatesOutputWithModelRoutingForTest,
   protectedLabels,
+  priorityMetadataForItemForTest,
   relatedTitleSearchTerms,
   renderReviewStartStatusComment,
   reviewArtifactDestination,
@@ -48,6 +53,7 @@ import {
   shouldReviewItem,
   shouldRetryGh,
   shouldPlanItem,
+  sweepStatusPayloadForTest,
   validateCloseDecision,
 } from "../dist/clawsweeper.js";
 import { checkConclusionForFrontMatter } from "../dist/commit-checks.js";
@@ -856,6 +862,167 @@ test("normal scheduler reserves throughput for PR and older buckets", () => {
   );
 
   assert.deepEqual(selectDueCandidateNumbersForTest(due, 8), [1, 2, 3, 4, 101, 201, 301, 5]);
+});
+
+test("priority planner is disabled by default and preserves scheduler ordering", () => {
+  const due = [
+    {
+      item: item({ number: 1, labels: [], updatedAt: "2025-12-20T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 1,
+    },
+    {
+      item: item({ number: 2, labels: ["security"], updatedAt: "2025-12-31T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 2,
+    },
+  ];
+
+  assert.deepEqual(selectDueCandidateNumbersForTest(due, 2), [1, 2]);
+});
+
+test("priority planner reorders candidates only within the same scheduler bucket", () => {
+  const due = [
+    {
+      item: item({ number: 1, labels: [], updatedAt: "2025-12-20T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 1,
+    },
+    {
+      item: item({ number: 2, labels: ["security"], updatedAt: "2025-12-31T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 2,
+    },
+  ];
+
+  assert.deepEqual(selectDueCandidateNumbersForTest(due, 2, true), [2, 1]);
+});
+
+test("priority planner does not move a lower bucket ahead of a higher bucket", () => {
+  const due = [
+    {
+      item: item({ number: 1, kind: "issue", labels: [], updatedAt: "2025-12-20T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 10,
+    },
+    {
+      item: item({
+        number: 2,
+        kind: "pull_request",
+        labels: ["security"],
+        updatedAt: "2025-12-31T00:00:00Z",
+      }),
+      bucket: "daily_pull_request",
+      priority: 3,
+      nextDueAt: 1,
+    },
+  ];
+
+  assert.deepEqual(selectDueCandidateNumbersForTest(due, 2, true), [1, 2]);
+});
+
+test("priority planner does not move floor backfill ahead of due candidates", () => {
+  const selected = [
+    {
+      item: item({ number: 1, labels: [], updatedAt: "2025-12-20T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 1,
+    },
+  ];
+  const backfill = [
+    {
+      item: item({ number: 2, labels: ["security"], updatedAt: "2025-12-31T00:00:00Z" }),
+      bucket: "hot_issue",
+      priority: 0,
+      reviewedAt: 100,
+      nextDueAt: 2,
+    },
+  ];
+
+  assert.deepEqual(appendFloorBackfillCandidateNumbersForTest(selected, backfill, 2, 2), [1, 2]);
+});
+
+test("priority planner tie-breakers are deterministic", () => {
+  assert.deepEqual(
+    selectDueCandidateNumbersForTest(
+      [
+        {
+          item: item({ number: 2, labels: ["bug"], updatedAt: "2025-12-31T00:00:00Z" }),
+          bucket: "hot_issue",
+          priority: 0,
+          reviewedAt: 1,
+          nextDueAt: 2,
+        },
+        {
+          item: item({ number: 1, labels: ["bug"], updatedAt: "2025-12-31T00:00:00Z" }),
+          bucket: "hot_issue",
+          priority: 0,
+          reviewedAt: 1,
+          nextDueAt: 1,
+        },
+      ],
+      2,
+      true,
+    ),
+    [1, 2],
+  );
+  assert.deepEqual(
+    selectDueCandidateNumbersForTest(
+      [
+        {
+          item: item({ number: 2, labels: ["bug"], updatedAt: "2025-12-31T00:00:00Z" }),
+          bucket: "hot_issue",
+          priority: 0,
+          reviewedAt: 2,
+          nextDueAt: 1,
+        },
+        {
+          item: item({ number: 1, labels: ["bug"], updatedAt: "2025-12-31T00:00:00Z" }),
+          bucket: "hot_issue",
+          priority: 0,
+          reviewedAt: 1,
+          nextDueAt: 1,
+        },
+      ],
+      2,
+      true,
+    ),
+    [1, 2],
+  );
+});
+
+test("priority planner preserves shard distribution count and capacity", () => {
+  const due = [
+    {
+      item: item({ number: 1, labels: [] }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 1,
+    },
+    {
+      item: item({ number: 2, labels: ["security"] }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 2,
+    },
+    {
+      item: item({ number: 3, labels: ["bug"] }),
+      bucket: "hot_issue",
+      priority: 0,
+      nextDueAt: 3,
+    },
+  ];
+  const disabled = selectDueCandidateNumbersForTest(due, 3);
+  const enabled = selectDueCandidateNumbersForTest(due, 3, true);
+
+  assert.equal(enabled.length, disabled.length);
+  assert.equal(shardItemNumbers(enabled, 2).length, shardItemNumbers(disabled, 2).length);
 });
 
 test("normal scheduler can fill active floor from stale current reviews", () => {
@@ -2054,6 +2221,232 @@ test("planned review shards stay within the Codex worker cap", () => {
   assert.equal(
     shards.reduce((total, shard) => total + shard.itemNumbers.length, 0),
     itemNumbers.length,
+  );
+});
+
+test("priority metadata is absent from planning output by default", () => {
+  const candidate = item({ number: 10, labels: ["security"] });
+  const output = planCandidatesOutputForTest([candidate], false);
+
+  assert.deepEqual(output, [candidate]);
+  assert.equal("priority_score" in output[0], false);
+  assert.equal("priority_band" in output[0], false);
+  assert.equal("priority_reasons" in output[0], false);
+});
+
+test("priority metadata appears in planning output when enabled", () => {
+  const [candidate] = planCandidatesOutputForTest(
+    [
+      item({
+        number: 10,
+        kind: "pull_request",
+        labels: ["security"],
+        updatedAt: "2026-01-01T00:00:00Z",
+      }),
+    ],
+    true,
+    new Date("2026-01-01T00:00:00.000Z"),
+  );
+
+  assert.equal(candidate.priority_band, "high");
+  assert.equal(candidate.priority_score, 0.812);
+  assert.ok(candidate.priority_reasons?.includes("high-signal label security"));
+});
+
+test("priority metadata does not change candidate ordering", () => {
+  const candidates = [
+    item({ number: 1, labels: ["question"], updatedAt: "2025-01-01T00:00:00Z" }),
+    item({ number: 2, labels: ["security"], updatedAt: "2026-01-01T00:00:00Z" }),
+    item({ number: 3, labels: ["bug"], updatedAt: "2025-12-30T00:00:00Z" }),
+  ];
+  const disabled = planCandidatesOutputForTest(candidates, false);
+  const enabled = planCandidatesOutputForTest(
+    candidates,
+    true,
+    new Date("2026-01-01T00:00:00.000Z"),
+  );
+
+  assert.deepEqual(
+    disabled.map((candidate) => candidate.number),
+    [1, 2, 3],
+  );
+  assert.deepEqual(
+    enabled.map((candidate) => candidate.number),
+    [1, 2, 3],
+  );
+  assert.equal(enabled[1]?.priority_band, "high");
+});
+
+test("priority metadata scoring tolerates missing item fields", () => {
+  assert.doesNotThrow(() => priorityMetadataForItemForTest({ labels: ["security"] }));
+  const metadata = priorityMetadataForItemForTest({ labels: ["security"] });
+
+  assert.equal(metadata.priority_band, "low");
+  assert.ok(metadata.priority_reasons.includes("missing item type"));
+  assert.ok(metadata.priority_reasons.includes("missing recent activity timestamp"));
+});
+
+test("priority metadata status payload is opt-in", () => {
+  assert.equal(
+    Object.hasOwn(
+      sweepStatusPayloadForTest({ state: "Planning", detail: "disabled" }),
+      "priority_metadata_enabled",
+    ),
+    false,
+  );
+  assert.equal(
+    sweepStatusPayloadForTest({
+      state: "Planning",
+      detail: "enabled",
+      priorityMetadataEnabled: true,
+    }).priority_metadata_enabled,
+    true,
+  );
+});
+
+test("priority planner status payload is opt-in", () => {
+  assert.equal(
+    Object.hasOwn(
+      sweepStatusPayloadForTest({ state: "Planning", detail: "disabled" }),
+      "priority_planner_enabled",
+    ),
+    false,
+  );
+  assert.equal(
+    sweepStatusPayloadForTest({
+      state: "Planning",
+      detail: "enabled",
+      priorityPlannerEnabled: true,
+    }).priority_planner_enabled,
+    true,
+  );
+});
+
+test("model routing metadata is absent from planning output by default", () => {
+  const candidate = item({ number: 10, labels: ["security"] });
+  const output = planCandidatesOutputWithModelRoutingForTest([candidate], false);
+
+  assert.deepEqual(output, [candidate]);
+  assert.equal("routing_tier" in output[0], false);
+  assert.equal("recommended_model" in output[0], false);
+  assert.equal("recommended_reasoning_effort" in output[0], false);
+  assert.equal("routing_reasons" in output[0], false);
+});
+
+test("model routing metadata appears in planning output when enabled", () => {
+  const [candidate] = planCandidatesOutputWithModelRoutingForTest(
+    [
+      item({
+        number: 10,
+        kind: "pull_request",
+        labels: ["security"],
+        updatedAt: "2026-01-01T00:00:00Z",
+      }),
+    ],
+    true,
+    new Date("2026-01-01T00:00:00.000Z"),
+  );
+
+  assert.equal(candidate.routing_tier, "high-risk");
+  assert.equal(candidate.recommended_reasoning_effort, "high");
+  assert.ok(candidate.routing_reasons?.includes("high-risk label security"));
+});
+
+test("model routing metadata status payload is opt-in", () => {
+  assert.equal(
+    Object.hasOwn(
+      sweepStatusPayloadForTest({ state: "Planning", detail: "disabled" }),
+      "model_routing_metadata_enabled",
+    ),
+    false,
+  );
+  assert.equal(
+    sweepStatusPayloadForTest({
+      state: "Planning",
+      detail: "enabled",
+      modelRoutingMetadataEnabled: true,
+    }).model_routing_metadata_enabled,
+    true,
+  );
+});
+
+test("adaptive scheduler metadata status payload is opt-in", () => {
+  assert.equal(
+    Object.hasOwn(
+      sweepStatusPayloadForTest({ state: "Planning", detail: "disabled" }),
+      "adaptive_scheduler_metadata_enabled",
+    ),
+    false,
+  );
+
+  const recommendation = adaptiveSchedulerRecommendationForTest({
+    targetRepo: "openclaw/openclaw",
+    lane: "normal_review",
+    plannedCount: 50,
+    plannedCapacity: 50,
+    activeCodexTarget: 50,
+    dueBacklog: 75,
+    capacityReason: "saturated: due backlog filled planned capacity",
+    currentShardCount: 50,
+    currentMinActiveShards: 25,
+    currentBatchSize: 1,
+  });
+  const enabled = sweepStatusPayloadForTest({
+    state: "Planning",
+    detail: "enabled",
+    adaptiveSchedulerMetadataEnabled: true,
+    adaptiveSchedulerRecommendation: recommendation,
+  });
+
+  assert.equal(enabled.adaptive_scheduler_metadata_enabled, true);
+  assert.deepEqual(enabled.adaptive_scheduler_recommendation, recommendation);
+});
+
+test("confidence metadata is absent from planning output by default", () => {
+  const candidate = item({ number: 10, labels: ["security"] });
+  const output = planCandidatesOutputWithConfidenceForTest([candidate], false);
+
+  assert.deepEqual(output, [candidate]);
+  assert.equal("confidence_target" in output[0], false);
+  assert.equal("confidence_score" in output[0], false);
+  assert.equal("confidence_band" in output[0], false);
+});
+
+test("confidence metadata appears in planning output when enabled", () => {
+  const [candidate] = planCandidatesOutputWithConfidenceForTest(
+    [
+      item({
+        number: 10,
+        kind: "pull_request",
+        labels: ["security"],
+        authorAssociation: "MEMBER",
+        updatedAt: "2026-01-01T00:00:00Z",
+      }),
+    ],
+    true,
+    new Date("2026-01-01T00:00:00.000Z"),
+  );
+
+  assert.equal(candidate.confidence_target, "review_verdict");
+  assert.ok(typeof candidate.confidence_score === "number");
+  assert.ok(candidate.confidence_reasons?.includes("review verdict planned_review"));
+});
+
+test("confidence metadata status payload is opt-in", () => {
+  assert.equal(
+    Object.hasOwn(
+      sweepStatusPayloadForTest({ state: "Planning", detail: "disabled" }),
+      "confidence_metadata_enabled",
+    ),
+    false,
+  );
+  assert.equal(
+    sweepStatusPayloadForTest({
+      state: "Planning",
+      detail: "enabled",
+      confidenceMetadataEnabled: true,
+    }).confidence_metadata_enabled,
+    true,
   );
 });
 

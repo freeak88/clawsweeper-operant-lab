@@ -7,6 +7,36 @@ turns narrow trusted findings into guarded repair or automerge work.
 The current production targets are `openclaw/openclaw`, `openclaw/clawhub`, and
 self-review for `openclaw/clawsweeper`.
 
+# ClawSweeper Operant Lab
+
+Experimental fork of ClawSweeper focused on conservative autonomous maintenance
+intelligence.
+
+This lab adds proposal-only and opt-in layers for:
+
+- Policy RFC generation
+- Priority scoring
+- Priority-assisted planning
+- Review memory
+- Model routing recommendations
+- Adaptive scheduler recommendations
+- Confidence scoring
+
+Safety boundary:
+
+- No default scheduler behavior changes
+- No GitHub mutation changes
+- No automatic issue closing
+- No automatic PR merging
+- No automatic repair dispatch
+- Apply/automerge remain unchanged unless explicitly wired in future work
+
+Validation summary:
+
+- Build passes
+- Targeted tests for all new modules pass
+- Local environment uses Node v22.19.0 while package declares Node >=24
+
 At a high level ClawSweeper:
 
 - reviews open issues and pull requests on a schedule and on exact GitHub events

@@ -38,6 +38,13 @@ import { stableJson } from "./stable-json.js";
 import { runText } from "./command.js";
 import { AUTOMATION_LIMITS } from "./limits.js";
 import {
+  recommendAdaptiveScheduler,
+  type AdaptiveSchedulerRecommendation,
+} from "./adaptive-scheduler/index.js";
+import { scoreConfidence, type ConfidenceScoreResult } from "./confidence-engine/index.js";
+import { classifyModelRouting, type ModelRoutingRecommendation } from "./model-routing/index.js";
+import { scorePriority, type PriorityScoreResult } from "./priority-engine/index.js";
+import {
   boolArg,
   itemNumbersArg,
   numberArg,
@@ -436,6 +443,12 @@ interface WorkflowStatusSummary {
   dueBacklog: number | undefined;
   oldestUnreviewedAt: string | undefined;
   capacityReason: string | undefined;
+  priorityMetadataEnabled: boolean | undefined;
+  priorityPlannerEnabled: boolean | undefined;
+  modelRoutingMetadataEnabled: boolean | undefined;
+  adaptiveSchedulerMetadataEnabled: boolean | undefined;
+  adaptiveSchedulerRecommendation: AdaptiveSchedulerRecommendation | undefined;
+  confidenceMetadataEnabled: boolean | undefined;
 }
 
 interface RepoDashboardSnapshot {
@@ -462,6 +475,11 @@ interface PlanCandidateResult {
   capacityReason: string;
   floorBackfill: number;
 }
+
+type PlanCandidateOutput = Item &
+  Partial<PriorityScoreResult> &
+  Partial<ModelRoutingRecommendation> &
+  Partial<ConfidenceScoreResult>;
 
 const DEFAULT_PLAN_BATCH_SIZE = 3;
 const DEFAULT_PLAN_SHARD_COUNT = AUTOMATION_LIMITS.review_shards.normal_default;
@@ -786,7 +804,177 @@ function auditStatePath(profile = targetProfile()): string {
   return join(ROOT, "results", "audit", `${profile.slug}.json`);
 }
 
-function writeSweepStatus(options: {
+function priorityMetadataEnabled(): boolean {
+  return process.env.CLAWSWEEPER_ENABLE_PRIORITY_METADATA === "1";
+}
+
+function priorityPlannerEnabled(): boolean {
+  return process.env.CLAWSWEEPER_ENABLE_PRIORITY_PLANNER === "1";
+}
+
+function modelRoutingMetadataEnabled(): boolean {
+  return process.env.CLAWSWEEPER_ENABLE_MODEL_ROUTING_METADATA === "1";
+}
+
+function adaptiveSchedulerMetadataEnabled(): boolean {
+  return process.env.CLAWSWEEPER_ENABLE_ADAPTIVE_SCHEDULER_METADATA === "1";
+}
+
+function confidenceMetadataEnabled(): boolean {
+  return process.env.CLAWSWEEPER_ENABLE_CONFIDENCE_METADATA === "1";
+}
+
+function repoPriorityWeight(repo: string | undefined): number {
+  if (!repo) return 0;
+  const normalized = normalizeRepo(repo);
+  if (normalized === DEFAULT_TARGET_REPO) return 0.8;
+  if (normalized === "openclaw/clawsweeper") return 0.65;
+  if (normalized.startsWith("openclaw/")) return 0.55;
+  return 0.35;
+}
+
+function priorityMetadataForItem(item: Partial<Item>, now = new Date()): PriorityScoreResult {
+  return scorePriority({
+    repo: item.repo,
+    repoWeight: repoPriorityWeight(item.repo),
+    labels: item.labels,
+    itemType: item.kind,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    authorAssociation: item.authorAssociation,
+    now,
+  });
+}
+
+function modelRoutingMetadataForItem(
+  item: Partial<Item>,
+  priority?: PriorityScoreResult | Partial<PriorityScoreResult>,
+): ModelRoutingRecommendation {
+  return classifyModelRouting({
+    priorityScore: priority?.priority_score,
+    priorityBand: priority?.priority_band,
+    labels: item.labels,
+    itemType: item.kind,
+  });
+}
+
+function confidenceMetadataForItem(
+  item: Partial<Item>,
+  priority?: PriorityScoreResult | Partial<PriorityScoreResult>,
+  routing?: ModelRoutingRecommendation | Partial<ModelRoutingRecommendation>,
+): ConfidenceScoreResult {
+  return scoreConfidence({
+    confidenceTarget: "review_verdict",
+    reviewVerdict: "planned_review",
+    labels: item.labels,
+    authorAssociation: item.authorAssociation,
+    priorityBand: priority?.priority_band,
+    modelRoutingTier: routing?.routing_tier,
+  });
+}
+
+function adaptiveSchedulerRecommendationForPlan(options: {
+  targetRepo: string;
+  lane?: string;
+  plannedCount?: number | undefined;
+  plannedCapacity?: number | undefined;
+  activeCodexTarget?: number | undefined;
+  dueBacklog?: number | undefined;
+  oldestUnreviewedAt?: string | undefined;
+  capacityReason?: string | undefined;
+  currentShardCount: number;
+  currentMinActiveShards: number;
+  currentBatchSize: number;
+}): AdaptiveSchedulerRecommendation {
+  return recommendAdaptiveScheduler({
+    targetRepo: options.targetRepo,
+    lane: options.lane ?? "normal_review",
+    plannedCount: options.plannedCount,
+    plannedCapacity: options.plannedCapacity,
+    activeCodexTarget: options.activeCodexTarget,
+    dueBacklog: options.dueBacklog,
+    oldestUnreviewedAt: options.oldestUnreviewedAt,
+    capacityReason: options.capacityReason,
+    currentShardCount: options.currentShardCount,
+    currentMinActiveShards: options.currentMinActiveShards,
+    currentBatchSize: options.currentBatchSize,
+    hardShardCap: MAX_PLAN_SHARD_COUNT,
+  });
+}
+
+function planCandidateOutput(
+  item: Item,
+  options: {
+    enabled?: boolean;
+    modelRoutingEnabled?: boolean;
+    confidenceEnabled?: boolean;
+    now?: Date;
+  } = {},
+): PlanCandidateOutput {
+  const priorityEnabled = options.enabled ?? priorityMetadataEnabled();
+  const routingEnabled = options.modelRoutingEnabled ?? modelRoutingMetadataEnabled();
+  const confidenceEnabled = options.confidenceEnabled ?? confidenceMetadataEnabled();
+  if (!priorityEnabled && !routingEnabled && !confidenceEnabled) return item;
+  const priority = priorityMetadataForItem(item, options.now);
+  const routing = modelRoutingMetadataForItem(item, priority);
+  return {
+    ...item,
+    ...(priorityEnabled ? priority : {}),
+    ...(routingEnabled ? routing : {}),
+    ...(confidenceEnabled ? confidenceMetadataForItem(item, priority, routing) : {}),
+  };
+}
+
+function planCandidatesOutput(
+  candidates: readonly Item[],
+  options: {
+    enabled?: boolean;
+    modelRoutingEnabled?: boolean;
+    confidenceEnabled?: boolean;
+    now?: Date;
+  } = {},
+): PlanCandidateOutput[] {
+  return candidates.map((candidate) => planCandidateOutput(candidate, options));
+}
+
+export function planCandidatesOutputForTest(
+  candidates: readonly Item[],
+  enabled: boolean,
+  now = new Date("2026-01-01T00:00:00.000Z"),
+): PlanCandidateOutput[] {
+  return planCandidatesOutput(candidates, { enabled, now });
+}
+
+export function planCandidatesOutputWithModelRoutingForTest(
+  candidates: readonly Item[],
+  modelRoutingEnabled: boolean,
+  now = new Date("2026-01-01T00:00:00.000Z"),
+): PlanCandidateOutput[] {
+  return planCandidatesOutput(candidates, { enabled: false, modelRoutingEnabled, now });
+}
+
+export function planCandidatesOutputWithConfidenceForTest(
+  candidates: readonly Item[],
+  confidenceEnabled: boolean,
+  now = new Date("2026-01-01T00:00:00.000Z"),
+): PlanCandidateOutput[] {
+  return planCandidatesOutput(candidates, { enabled: false, confidenceEnabled, now });
+}
+
+export function priorityMetadataForItemForTest(
+  item: Partial<Item>,
+  now = new Date("2026-01-01T00:00:00.000Z"),
+): PriorityScoreResult {
+  return priorityMetadataForItem(item, now);
+}
+
+export function adaptiveSchedulerRecommendationForTest(
+  options: Parameters<typeof adaptiveSchedulerRecommendationForPlan>[0],
+): AdaptiveSchedulerRecommendation {
+  return adaptiveSchedulerRecommendationForPlan(options);
+}
+
+function sweepStatusPayload(options: {
   state: string;
   detail: string;
   runUrl?: string;
@@ -798,10 +986,34 @@ function writeSweepStatus(options: {
   dueBacklog?: number;
   oldestUnreviewedAt?: string;
   capacityReason?: string;
-}): void {
+  priorityMetadataEnabled?: boolean;
+  priorityPlannerEnabled?: boolean;
+  modelRoutingMetadataEnabled?: boolean;
+  adaptiveSchedulerMetadataEnabled?: boolean;
+  adaptiveSchedulerRecommendation?: AdaptiveSchedulerRecommendation;
+  confidenceMetadataEnabled?: boolean;
+  updatedAt?: string;
+}): Record<string, unknown> {
   const profile = options.profile ?? targetProfile();
-  const updatedAt = new Date().toISOString();
-  const payload = {
+  const includeAdaptiveScheduler =
+    options.adaptiveSchedulerMetadataEnabled ?? adaptiveSchedulerMetadataEnabled();
+  const adaptiveSchedulerRecommendation =
+    options.adaptiveSchedulerRecommendation ??
+    (includeAdaptiveScheduler
+      ? adaptiveSchedulerRecommendationForPlan({
+          targetRepo: profile.targetRepo,
+          plannedCount: options.plannedCount,
+          plannedCapacity: options.plannedCapacity,
+          activeCodexTarget: options.activeCodex,
+          dueBacklog: options.dueBacklog,
+          oldestUnreviewedAt: options.oldestUnreviewedAt,
+          capacityReason: options.capacityReason,
+          currentShardCount: options.plannedShards ?? DEFAULT_PLAN_SHARD_COUNT,
+          currentMinActiveShards: AUTOMATION_LIMITS.review_shards.normal_active_floor,
+          currentBatchSize: DEFAULT_PLAN_BATCH_SIZE,
+        })
+      : undefined);
+  return {
     schema_version: 1,
     slug: profile.slug,
     display_name: profile.displayName,
@@ -816,8 +1028,61 @@ function writeSweepStatus(options: {
     due_backlog: options.dueBacklog ?? null,
     oldest_unreviewed_at: options.oldestUnreviewedAt ?? null,
     capacity_reason: options.capacityReason ?? null,
-    updated_at: updatedAt,
+    ...((options.priorityMetadataEnabled ?? priorityMetadataEnabled())
+      ? { priority_metadata_enabled: true }
+      : {}),
+    ...((options.priorityPlannerEnabled ?? priorityPlannerEnabled())
+      ? { priority_planner_enabled: true }
+      : {}),
+    ...((options.modelRoutingMetadataEnabled ?? modelRoutingMetadataEnabled())
+      ? { model_routing_metadata_enabled: true }
+      : {}),
+    ...(includeAdaptiveScheduler ? { adaptive_scheduler_metadata_enabled: true } : {}),
+    ...(includeAdaptiveScheduler && adaptiveSchedulerRecommendation
+      ? { adaptive_scheduler_recommendation: adaptiveSchedulerRecommendation }
+      : {}),
+    ...((options.confidenceMetadataEnabled ?? confidenceMetadataEnabled())
+      ? { confidence_metadata_enabled: true }
+      : {}),
+    updated_at: options.updatedAt ?? new Date().toISOString(),
   };
+}
+
+export function sweepStatusPayloadForTest(options: {
+  state: string;
+  detail: string;
+  priorityMetadataEnabled?: boolean;
+  priorityPlannerEnabled?: boolean;
+  modelRoutingMetadataEnabled?: boolean;
+  adaptiveSchedulerMetadataEnabled?: boolean;
+  adaptiveSchedulerRecommendation?: AdaptiveSchedulerRecommendation;
+  confidenceMetadataEnabled?: boolean;
+  updatedAt?: string;
+}): Record<string, unknown> {
+  return sweepStatusPayload(options);
+}
+
+function writeSweepStatus(options: {
+  state: string;
+  detail: string;
+  runUrl?: string;
+  profile?: RepositoryProfile;
+  plannedCount?: number;
+  plannedCapacity?: number;
+  plannedShards?: number;
+  activeCodex?: number;
+  dueBacklog?: number;
+  oldestUnreviewedAt?: string;
+  capacityReason?: string;
+  priorityMetadataEnabled?: boolean;
+  priorityPlannerEnabled?: boolean;
+  modelRoutingMetadataEnabled?: boolean;
+  adaptiveSchedulerMetadataEnabled?: boolean;
+  adaptiveSchedulerRecommendation?: AdaptiveSchedulerRecommendation;
+  confidenceMetadataEnabled?: boolean;
+}): void {
+  const profile = options.profile ?? targetProfile();
+  const payload = sweepStatusPayload(options);
   const outputPath = sweepStatusPath(profile);
   ensureDir(dirname(outputPath));
   writeFileSync(outputPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
@@ -2298,6 +2563,21 @@ function compareDueCandidates(left: DueCandidate, right: DueCandidate): number {
   );
 }
 
+function priorityAssistedDueComparator(
+  now = new Date(),
+): (left: DueCandidate, right: DueCandidate) => number {
+  return (left, right) => {
+    const leftPriority = priorityMetadataForItem(left.item, now);
+    const rightPriority = priorityMetadataForItem(right.item, now);
+    return (
+      rightPriority.priority_score - leftPriority.priority_score ||
+      left.nextDueAt - right.nextDueAt ||
+      left.reviewedAt - right.reviewedAt ||
+      left.item.number - right.item.number
+    );
+  };
+}
+
 function compareBackfillCandidates(left: DueCandidate, right: DueCandidate): number {
   return (
     left.nextDueAt - right.nextDueAt ||
@@ -2385,6 +2665,8 @@ export function selectDueCandidateNumbersForTest(
     nextDueAt?: number;
   }>,
   limit: number,
+  priorityPlanner = false,
+  now = new Date("2026-01-01T00:00:00.000Z"),
 ): number[] {
   return selectDueCandidates(
     due.map((candidate) => ({
@@ -2396,6 +2678,7 @@ export function selectDueCandidateNumbersForTest(
       bucket: candidate.bucket,
     })),
     limit,
+    priorityPlanner ? priorityAssistedDueComparator(now) : compareDueCandidates,
   ).map((candidate) => candidate.item.number);
 }
 
@@ -3005,10 +3288,17 @@ function planCandidates(options: {
     }
     if (shouldStopSaturatedPlanScan({ dueCount: due.length, capacity })) break;
   }
-  const selected = appendFloorBackfillCandidates(selectDueCandidates(due, capacity), backfill, {
-    activeFloor,
-    capacity,
-  });
+  const dueCompare = priorityPlannerEnabled()
+    ? priorityAssistedDueComparator(new Date(now))
+    : compareDueCandidates;
+  const selected = appendFloorBackfillCandidates(
+    selectDueCandidates(due, capacity, dueCompare),
+    backfill,
+    {
+      activeFloor,
+      capacity,
+    },
+  );
   const floorBackfill = selected.filter((candidate) => !due.includes(candidate)).length;
   const candidates = selected.map(({ item }) => item);
   const shards = shardItemNumbers(
@@ -3499,6 +3789,11 @@ function workflowStatusBlock(options?: {
   dueBacklog?: number | undefined;
   oldestUnreviewedAt?: string | undefined;
   capacityReason?: string | undefined;
+  priorityMetadataEnabled?: boolean | undefined;
+  priorityPlannerEnabled?: boolean | undefined;
+  modelRoutingMetadataEnabled?: boolean | undefined;
+  adaptiveSchedulerMetadataEnabled?: boolean | undefined;
+  confidenceMetadataEnabled?: boolean | undefined;
 }): string {
   const profile = options?.profile ?? targetProfile();
   const updatedAt = formatTimestamp(options?.updatedAt ?? new Date().toISOString());
@@ -3528,6 +3823,11 @@ function workflowStatusMetricLines(options: {
   dueBacklog?: number | undefined;
   oldestUnreviewedAt?: string | undefined;
   capacityReason?: string | undefined;
+  priorityMetadataEnabled?: boolean | undefined;
+  priorityPlannerEnabled?: boolean | undefined;
+  modelRoutingMetadataEnabled?: boolean | undefined;
+  adaptiveSchedulerMetadataEnabled?: boolean | undefined;
+  confidenceMetadataEnabled?: boolean | undefined;
 }): string[] {
   const lines: string[] = [];
   if (
@@ -3553,6 +3853,21 @@ function workflowStatusMetricLines(options: {
   if (options.capacityReason) {
     lines.push(`Capacity reason: ${options.capacityReason}.`);
   }
+  if (options.priorityMetadataEnabled) {
+    lines.push("Priority metadata: enabled.");
+  }
+  if (options.priorityPlannerEnabled) {
+    lines.push("Priority planner: enabled.");
+  }
+  if (options.modelRoutingMetadataEnabled) {
+    lines.push("Model routing metadata: enabled.");
+  }
+  if (options.adaptiveSchedulerMetadataEnabled) {
+    lines.push("Adaptive scheduler metadata: enabled.");
+  }
+  if (options.confidenceMetadataEnabled) {
+    lines.push("Confidence metadata: enabled.");
+  }
   return lines;
 }
 
@@ -3577,6 +3892,16 @@ function readSweepStatusSummary(profile = targetProfile()): WorkflowStatusSummar
       dueBacklog: numberOrUndefined(parsed.due_backlog),
       oldestUnreviewedAt: stringOrUndefined(parsed.oldest_unreviewed_at),
       capacityReason: stringOrUndefined(parsed.capacity_reason),
+      priorityMetadataEnabled: booleanOrUndefined(parsed.priority_metadata_enabled),
+      priorityPlannerEnabled: booleanOrUndefined(parsed.priority_planner_enabled),
+      modelRoutingMetadataEnabled: booleanOrUndefined(parsed.model_routing_metadata_enabled),
+      adaptiveSchedulerMetadataEnabled: booleanOrUndefined(
+        parsed.adaptive_scheduler_metadata_enabled,
+      ),
+      adaptiveSchedulerRecommendation: adaptiveSchedulerRecommendationOrUndefined(
+        parsed.adaptive_scheduler_recommendation,
+      ),
+      confidenceMetadataEnabled: booleanOrUndefined(parsed.confidence_metadata_enabled),
     };
   } catch {
     return null;
@@ -3590,6 +3915,42 @@ function stringOrUndefined(value: unknown): string | undefined {
 function numberOrUndefined(value: unknown): number | undefined {
   const number = typeof value === "number" ? value : Number(value);
   return Number.isFinite(number) ? number : undefined;
+}
+
+function booleanOrUndefined(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function adaptiveSchedulerRecommendationOrUndefined(
+  value: unknown,
+): AdaptiveSchedulerRecommendation | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const record = value as Record<string, unknown>;
+  const recommendation = record.recommendation;
+  const confidence = record.confidence;
+  const shardCount = record.recommended_shard_count;
+  const minActiveShards = record.recommended_min_active_shards;
+  const batchSize = record.recommended_batch_size;
+  const reasons = record.reasons;
+  if (
+    typeof recommendation !== "string" ||
+    typeof confidence !== "number" ||
+    typeof shardCount !== "number" ||
+    typeof minActiveShards !== "number" ||
+    typeof batchSize !== "number" ||
+    !Array.isArray(reasons) ||
+    !reasons.every((reason) => typeof reason === "string")
+  ) {
+    return undefined;
+  }
+  return {
+    recommendation: recommendation as AdaptiveSchedulerRecommendation["recommendation"],
+    confidence,
+    recommended_shard_count: shardCount,
+    recommended_min_active_shards: minActiveShards,
+    recommended_batch_size: batchSize,
+    reasons,
+  };
 }
 
 function currentWorkflowStatusBlock(readme: string, profile = targetProfile()): string {
@@ -3626,6 +3987,17 @@ function workflowStatusSummary(block: string): WorkflowStatusSummary {
   const dueBacklog = numberOrUndefined(block.match(/^Due backlog scanned: (\d+)\.$/m)?.[1]);
   const oldestUnreviewedAt = block.match(/^Oldest unreviewed: (.+)\.$/m)?.[1];
   const capacityReason = block.match(/^Capacity reason: (.+)\.$/m)?.[1];
+  const priorityMetadataEnabled = block.match(/^Priority metadata: enabled\.$/m) ? true : undefined;
+  const priorityPlannerEnabled = block.match(/^Priority planner: enabled\.$/m) ? true : undefined;
+  const modelRoutingMetadataEnabled = block.match(/^Model routing metadata: enabled\.$/m)
+    ? true
+    : undefined;
+  const adaptiveSchedulerMetadataEnabled = block.match(/^Adaptive scheduler metadata: enabled\.$/m)
+    ? true
+    : undefined;
+  const confidenceMetadataEnabled = block.match(/^Confidence metadata: enabled\.$/m)
+    ? true
+    : undefined;
   return {
     updatedAt,
     state,
@@ -3638,6 +4010,12 @@ function workflowStatusSummary(block: string): WorkflowStatusSummary {
     dueBacklog,
     oldestUnreviewedAt,
     capacityReason,
+    priorityMetadataEnabled,
+    priorityPlannerEnabled,
+    modelRoutingMetadataEnabled,
+    adaptiveSchedulerMetadataEnabled,
+    adaptiveSchedulerRecommendation: undefined,
+    confidenceMetadataEnabled,
   };
 }
 
@@ -5560,10 +5938,32 @@ function planCommand(args: Args): void {
   if (hasItemNumbersInput || itemNumbers.length > 0) planOptions.itemNumbers = itemNumbers;
   if (hotIntake) planOptions.hotIntake = true;
   const plan = planCandidates(planOptions);
+  const adaptiveSchedulerRecommendation = adaptiveSchedulerMetadataEnabled()
+    ? adaptiveSchedulerRecommendationForPlan({
+        targetRepo: targetRepo(),
+        lane: hotIntake ? "hot_intake" : "normal_review",
+        plannedCount: plan.candidates.length,
+        plannedCapacity: plan.capacity,
+        activeCodexTarget: plan.activeCodexTarget,
+        dueBacklog: plan.dueBacklog,
+        oldestUnreviewedAt: plan.oldestUnreviewedAt,
+        capacityReason: plan.capacityReason,
+        currentShardCount: shardCount,
+        currentMinActiveShards: minimumActiveShards,
+        currentBatchSize: batchSize,
+      })
+    : undefined;
   console.log(
     JSON.stringify(
       {
         ...plan,
+        candidates: planCandidatesOutput(plan.candidates),
+        ...(adaptiveSchedulerRecommendation
+          ? {
+              adaptive_scheduler_metadata_enabled: true,
+              adaptive_scheduler_recommendation: adaptiveSchedulerRecommendation,
+            }
+          : {}),
         reviewPolicy,
         matrix: plan.shards.map((shard) => ({
           shard: shard.shard,
