@@ -94,3 +94,13 @@ Implemented:
 - Deterministic shadow simulations for hypothetical impact estimates
 - Proposal-ready guarded PR suggestions without creating PRs
 - No GitHub mutation, autonomous merge, scheduler mutation, repair dispatch, runtime self-modification, or apply/automerge behavior change
+
+## v0.9 — Operator Approval Gate
+
+Implemented:
+
+- Explicit operator approval records for improvement proposals
+- Planning-only approval scope: `implementation_plan_only`
+- Local implementation plan artifacts with steps, likely files, tests, rollback, and safety constraints
+- Blocked outputs for missing, invalid, false, mismatched, or wrong-scope approvals
+- No PR creation, GitHub mutation, merge, scheduler/apply/automerge change, or repair dispatch

@@ -23,6 +23,7 @@
     "guarded-execution": "node dist/guarded-execution/index.js",
     "demo-report": "node dist/demo-report/index.js",
     "improvement-loop": "node dist/improvement-loop/index.js",
+    "approval-gate": "node dist/approval-gate/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",
