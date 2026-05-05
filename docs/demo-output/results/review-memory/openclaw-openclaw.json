@@ -1,0 +1,202 @@
+{
+  "generated_at": "2026-05-05T12:00:00.000Z",
+  "items": [
+    {
+      "automerge_causes": [],
+      "conflict_types": [
+        "documentation"
+      ],
+      "item_number": 101,
+      "labels": [
+        "docs",
+        "maintenance"
+      ],
+      "policy_rfc_refs": [],
+      "repair_markers": [
+        "successful-repair"
+      ],
+      "safe_close_reasons": [
+        "not_applicable_annotation_only"
+      ],
+      "target_repo": "openclaw/openclaw",
+      "verdicts": [
+        "annotate_only"
+      ]
+    },
+    {
+      "automerge_causes": [],
+      "conflict_types": [
+        "documentation"
+      ],
+      "item_number": 102,
+      "labels": [
+        "docs",
+        "maintenance"
+      ],
+      "policy_rfc_refs": [],
+      "repair_markers": [
+        "successful-repair"
+      ],
+      "safe_close_reasons": [
+        "not_applicable_annotation_only"
+      ],
+      "target_repo": "openclaw/openclaw",
+      "verdicts": [
+        "annotate_only"
+      ]
+    },
+    {
+      "automerge_causes": [],
+      "conflict_types": [
+        "documentation"
+      ],
+      "item_number": 103,
+      "labels": [
+        "docs",
+        "maintenance"
+      ],
+      "policy_rfc_refs": [],
+      "repair_markers": [
+        "successful-repair"
+      ],
+      "safe_close_reasons": [
+        "not_applicable_annotation_only"
+      ],
+      "target_repo": "openclaw/openclaw",
+      "verdicts": [
+        "annotate_only"
+      ]
+    },
+    {
+      "automerge_causes": [],
+      "conflict_types": [
+        "documentation"
+      ],
+      "item_number": 104,
+      "labels": [
+        "docs",
+        "maintenance"
+      ],
+      "policy_rfc_refs": [],
+      "repair_markers": [
+        "successful-repair"
+      ],
+      "safe_close_reasons": [
+        "not_applicable_annotation_only"
+      ],
+      "target_repo": "openclaw/openclaw",
+      "verdicts": [
+        "annotate_only"
+      ]
+    },
+    {
+      "automerge_causes": [],
+      "conflict_types": [
+        "documentation"
+      ],
+      "item_number": 105,
+      "labels": [
+        "docs",
+        "maintenance"
+      ],
+      "policy_rfc_refs": [],
+      "repair_markers": [
+        "successful-repair"
+      ],
+      "safe_close_reasons": [
+        "not_applicable_annotation_only"
+      ],
+      "target_repo": "openclaw/openclaw",
+      "verdicts": [
+        "annotate_only"
+      ]
+    }
+  ],
+  "patterns": [
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "conflict_type",
+      "pattern_value": "documentation",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    },
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "label",
+      "pattern_value": "docs",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    },
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "label",
+      "pattern_value": "maintenance",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    },
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "repair_marker",
+      "pattern_value": "successful-repair",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    },
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "safe_close_reason",
+      "pattern_value": "not_applicable_annotation_only",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    },
+    {
+      "distinct_items": 5,
+      "occurrences": 5,
+      "pattern_type": "verdict",
+      "pattern_value": "annotate_only",
+      "source_records": [
+        "records/openclaw-openclaw/items/101.md",
+        "records/openclaw-openclaw/items/102.md",
+        "records/openclaw-openclaw/items/103.md",
+        "records/openclaw-openclaw/items/104.md",
+        "records/openclaw-openclaw/items/105.md"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "item_count": 5,
+    "pattern_count": 6,
+    "record_count": 5
+  },
+  "target_repo": "openclaw/openclaw"
+}

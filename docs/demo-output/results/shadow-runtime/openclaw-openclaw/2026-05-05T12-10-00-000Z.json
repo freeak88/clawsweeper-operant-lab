@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-05-05T12:10:00.000Z",
+  "matches": [
+    {
+      "confidence_band": "medium",
+      "confidence_score": 0.48,
+      "dry_run_only": true,
+      "item_number": 101,
+      "matched": true,
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "confidence_band": "medium",
+      "confidence_score": 0.48,
+      "dry_run_only": true,
+      "item_number": 102,
+      "matched": true,
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "confidence_band": "medium",
+      "confidence_score": 0.48,
+      "dry_run_only": true,
+      "item_number": 103,
+      "matched": true,
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "confidence_band": "medium",
+      "confidence_score": 0.48,
+      "dry_run_only": true,
+      "item_number": 104,
+      "matched": true,
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "confidence_band": "medium",
+      "confidence_score": 0.48,
+      "dry_run_only": true,
+      "item_number": 105,
+      "matched": true,
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    }
+  ],
+  "schema_version": 1,
+  "summary": {
+    "item_count": 5,
+    "match_count": 5,
+    "policy_count": 1,
+    "would_action_counts": {
+      "annotate_only": 5
+    }
+  },
+  "target_repo": "openclaw/openclaw"
+}

@@ -1,0 +1,34 @@
+{
+  "action": "none",
+  "dry_run": true,
+  "executed": false,
+  "full_reasoning": [
+    "blocked_count=0",
+    "candidate_for_guarded_execution=false",
+    "confidence: annotation-only action",
+    "confidence: five stable shadow matches",
+    "confidence: no blocked or risky matches",
+    "confidence_score=0.95",
+    "dry_run=true",
+    "enabled=true",
+    "item_number=101",
+    "policy_id=safe-annotation-policy",
+    "requested_action=annotate_only",
+    "risk_count_by_policy=5"
+  ],
+  "generated_at": "2026-05-05T12:20:00.000Z",
+  "item_number": 101,
+  "policy_id": "safe-annotation-policy",
+  "reason": "dry_run=true prevents execution",
+  "rollback_hint": "No rollback required; no guarded action was executed.",
+  "safety_constraints": [
+    "no policy execution beyond local guarded decision logging",
+    "no GitHub mutation",
+    "no issue closing",
+    "no PR merging",
+    "no repair dispatch",
+    "no repository state modification",
+    "no scheduler/apply/automerge behavior change"
+  ],
+  "schema_version": 1
+}

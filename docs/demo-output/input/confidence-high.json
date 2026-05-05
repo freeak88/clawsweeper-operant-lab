@@ -1,0 +1,10 @@
+{
+  "confidence_score": 0.95,
+  "confidence_band": "high",
+  "confidence_reasons": [
+    "five stable shadow matches",
+    "annotation-only action",
+    "no blocked or risky matches"
+  ],
+  "blocking_risks": []
+}

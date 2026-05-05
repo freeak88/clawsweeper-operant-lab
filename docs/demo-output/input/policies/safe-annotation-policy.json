@@ -1,0 +1,30 @@
+{
+  "policy_id": "safe-annotation-policy",
+  "status": "approved",
+  "conditions": [
+    {
+      "field": "labels",
+      "op": "includes",
+      "value": "maintenance"
+    },
+    {
+      "field": "verdicts",
+      "op": "includes",
+      "value": "annotate_only"
+    },
+    {
+      "field": "repair_markers",
+      "op": "includes",
+      "value": "successful-repair"
+    },
+    {
+      "field": "conflict_types",
+      "op": "not_includes",
+      "value": "security"
+    }
+  ],
+  "action": {
+    "type": "annotate_only",
+    "mode": "dry_run_only"
+  }
+}

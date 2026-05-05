@@ -1,0 +1,48 @@
+{
+  "average_confidence_by_policy": {
+    "safe-annotation-policy": 0.48
+  },
+  "blocked_count": 0,
+  "generated_at": "2026-05-05T12:15:00.000Z",
+  "high_confidence_match_count": 0,
+  "low_confidence_match_count": 0,
+  "matches_by_policy": {
+    "safe-annotation-policy": 5
+  },
+  "policies": [
+    {
+      "average_confidence_by_policy": 0.48,
+      "blocked_count": 0,
+      "candidate_for_guarded_execution": false,
+      "candidate_reason": "average confidence below threshold: 0.48/0.8",
+      "high_confidence_match_count": 0,
+      "low_confidence_match_count": 0,
+      "matches_by_policy": 5,
+      "policy_id": "safe-annotation-policy",
+      "risk_count_by_policy": 5,
+      "would_action_counts": {
+        "annotate_only": 5
+      }
+    }
+  ],
+  "policy_count": 1,
+  "risk_count_by_policy": {
+    "safe-annotation-policy": 5
+  },
+  "schema_version": 1,
+  "thresholds": {
+    "allowlistedActions": [
+      "annotate_only",
+      "propose_close"
+    ],
+    "highConfidenceThreshold": 0.8,
+    "lowConfidenceThreshold": 0.4,
+    "maxRiskCount": 1,
+    "minAverageConfidence": 0.8,
+    "minObservations": 5
+  },
+  "total_matches": 5,
+  "would_action_counts": {
+    "annotate_only": 5
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "dry_run_only": true,
+  "evaluated_count": 5,
+  "matched_count": 5,
+  "policy_id": "safe-annotation-policy",
+  "results": [
+    {
+      "dry_run_only": true,
+      "failed_conditions": [],
+      "matched": true,
+      "matched_conditions": [
+        "conflict_types not_includes \"security\"",
+        "labels includes \"maintenance\"",
+        "repair_markers includes \"successful-repair\"",
+        "verdicts includes \"annotate_only\""
+      ],
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "dry_run_only": true,
+      "failed_conditions": [],
+      "matched": true,
+      "matched_conditions": [
+        "conflict_types not_includes \"security\"",
+        "labels includes \"maintenance\"",
+        "repair_markers includes \"successful-repair\"",
+        "verdicts includes \"annotate_only\""
+      ],
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "dry_run_only": true,
+      "failed_conditions": [],
+      "matched": true,
+      "matched_conditions": [
+        "conflict_types not_includes \"security\"",
+        "labels includes \"maintenance\"",
+        "repair_markers includes \"successful-repair\"",
+        "verdicts includes \"annotate_only\""
+      ],
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "dry_run_only": true,
+      "failed_conditions": [],
+      "matched": true,
+      "matched_conditions": [
+        "conflict_types not_includes \"security\"",
+        "labels includes \"maintenance\"",
+        "repair_markers includes \"successful-repair\"",
+        "verdicts includes \"annotate_only\""
+      ],
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    },
+    {
+      "dry_run_only": true,
+      "failed_conditions": [],
+      "matched": true,
+      "matched_conditions": [
+        "conflict_types not_includes \"security\"",
+        "labels includes \"maintenance\"",
+        "repair_markers includes \"successful-repair\"",
+        "verdicts includes \"annotate_only\""
+      ],
+      "policy_id": "safe-annotation-policy",
+      "risks": [
+        "dry-run only; no action executed"
+      ],
+      "would_action": "annotate_only"
+    }
+  ]
+}

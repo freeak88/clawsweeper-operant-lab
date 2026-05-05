@@ -1,0 +1,58 @@
+{
+  "confidence_score": 0.75,
+  "created_at": "2026-05-05T12:00:00.000Z",
+  "evidence_items": [
+    {
+      "item": "#101",
+      "observed_at": "2026-05-01T10:00:00.000Z",
+      "repo": "openclaw/openclaw",
+      "source_record": "records/openclaw-openclaw/items/101.md"
+    },
+    {
+      "item": "#102",
+      "observed_at": "2026-05-01T11:00:00.000Z",
+      "repo": "openclaw/openclaw",
+      "source_record": "records/openclaw-openclaw/items/102.md"
+    },
+    {
+      "item": "#103",
+      "observed_at": "2026-05-02T10:00:00.000Z",
+      "repo": "openclaw/openclaw",
+      "source_record": "records/openclaw-openclaw/items/103.md"
+    },
+    {
+      "item": "#104",
+      "observed_at": "2026-05-02T11:00:00.000Z",
+      "repo": "openclaw/openclaw",
+      "source_record": "records/openclaw-openclaw/items/104.md"
+    },
+    {
+      "item": "#105",
+      "observed_at": "2026-05-03T10:00:00.000Z",
+      "repo": "openclaw/openclaw",
+      "source_record": "records/openclaw-openclaw/items/105.md"
+    }
+  ],
+  "id": "policy-rfc-label-docs-8a0bf3cc",
+  "pattern_type": "label",
+  "proposed_action": "Document a candidate review heuristic for this repeated label; do not mutate labels automatically.",
+  "proposed_conditions": [
+    "The observed label is \"docs\".",
+    "At least the configured minimum number of distinct records show the same pattern.",
+    "The source record has durable ClawSweeper evidence and is not a malformed or partial record."
+  ],
+  "safety_constraints": [
+    "Proposal-only: this RFC must not execute policy automatically.",
+    "No GitHub mutation is allowed from the Policy RFC Engine.",
+    "Existing scheduler review, apply, close, and automerge paths remain unchanged."
+  ],
+  "source_records": [
+    "records/openclaw-openclaw/items/101.md",
+    "records/openclaw-openclaw/items/102.md",
+    "records/openclaw-openclaw/items/103.md",
+    "records/openclaw-openclaw/items/104.md",
+    "records/openclaw-openclaw/items/105.md"
+  ],
+  "status": "Draft",
+  "title": "Policy RFC: Label - docs"
+}
