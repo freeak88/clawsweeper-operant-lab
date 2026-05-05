@@ -150,6 +150,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Demo Report Generator
 - Autonomous Improvement Loop
 - Operator Approval Gate
+- Supervised Implementation Writer
 
 Core modules:
 
@@ -163,6 +164,7 @@ Core modules:
 - [`docs/demo-report.md`](docs/demo-report.md)
 - [`docs/improvement-loop.md`](docs/improvement-loop.md)
 - [`docs/approval-gate.md`](docs/approval-gate.md)
+- [`docs/implementation-writer.md`](docs/implementation-writer.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

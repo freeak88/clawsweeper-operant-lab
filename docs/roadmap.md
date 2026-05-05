@@ -104,3 +104,13 @@ Implemented:
 - Local implementation plan artifacts with steps, likely files, tests, rollback, and safety constraints
 - Blocked outputs for missing, invalid, false, mismatched, or wrong-scope approvals
 - No PR creation, GitHub mutation, merge, scheduler/apply/automerge change, or repair dispatch
+
+## v1.0 — Supervised Implementation Writer
+
+Implemented:
+
+- Deterministic Codex-ready prompt generation from approved implementation plans
+- Markdown and JSON implementation prompt artifacts
+- Blocked output for non-approved, wrong-scope, missing, or malformed plans
+- Prompt sections for goal, context, scope, files, steps, tests, rollback, safety, non-goals, and final response requirements
+- No code execution, commit creation, PR creation, push, GitHub mutation, repair dispatch, or scheduler/apply/automerge behavior change
