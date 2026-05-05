@@ -15,6 +15,7 @@ intelligence.
 This lab adds proposal-only and opt-in layers for:
 
 - Policy RFC generation
+- RFC promotion lifecycle
 - Priority scoring
 - Priority-assisted planning
 - Review memory
