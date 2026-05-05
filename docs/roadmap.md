@@ -54,9 +54,15 @@ Implemented:
 - Local CLI command for shadow report generation
 - No policy execution or scheduler/apply/automerge mutation wiring
 
-## v0.5 — Adaptive Scheduler Runtime
+## v0.5 — Shadow Accuracy Metrics
 
-Opt-in capacity tuning based on scheduler recommendations.
+Implemented:
+
+- Shadow Runtime reports aggregated into policy-level metrics
+- Confidence averages, blocked counts, risk counts, and action counts
+- Conservative guarded-execution candidate flag and reason
+- Local CLI command for metrics generation
+- No policy execution or scheduler/apply/automerge mutation wiring
 
 ## v0.6 — Confidence-Gated Actions
 

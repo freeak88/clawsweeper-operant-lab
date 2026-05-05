@@ -18,6 +18,7 @@ This lab adds proposal-only and opt-in layers for:
 - RFC promotion lifecycle
 - Policy DSL dry-run evaluation
 - Shadow runtime reports
+- Shadow accuracy metrics
 - Priority scoring
 - Priority-assisted planning
 - Review memory
