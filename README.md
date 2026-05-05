@@ -135,6 +135,20 @@ CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1 pnpm run guarded-execution -- \
 
 The high-level architecture is documented in [`docs/architecture.md`](docs/architecture.md).
 
+## Autonomous Operant Layers
+
+- Priority Engine
+- Review Memory
+- Policy RFC Engine
+- Policy Promotion
+- Policy DSL
+- Model Routing
+- Adaptive Scheduler
+- Confidence Engine
+- Shadow Runtime
+- Guarded Execution
+- Demo Report Generator
+
 Core modules:
 
 - [`docs/review-memory.md`](docs/review-memory.md)

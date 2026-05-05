@@ -8,6 +8,44 @@ The pipeline is intentionally staged:
 records -> memory -> RFC -> promotion -> DSL -> shadow runtime -> metrics -> guarded execution
 ```
 
+```mermaid
+flowchart LR
+  Records["Durable Records\nreviews, repairs, outcomes"] --> Memory["Review Memory\nlocal deterministic index"]
+  Scheduler["Scheduler\nexisting lanes"] --> Planner["Planner\nexisting selection"]
+  Planner --> Priority["Priority Engine\nmetadata or opt-in ordering"]
+  Planner --> Routing["Model Routing\nrecommendation metadata"]
+  Memory --> RFC["Policy RFC Engine\nrepeated pattern proposals"]
+  RFC --> Promotion["Policy Promotion\nDraft -> Candidate -> Approved"]
+  Promotion --> DSL["Policy DSL\napproved deterministic rules"]
+  Memory --> Confidence["Confidence Engine\nproposal-only confidence"]
+  DSL --> Shadow["Shadow Runtime\nwhat would happen"]
+  Confidence --> Shadow
+  Shadow --> Metrics["Shadow Metrics\naccuracy and risk evidence"]
+  Metrics --> Guarded["Guarded Execution\nannotate_only / suggest_comment"]
+  Metrics --> Demo["Demo Report Generator\nhuman-readable report"]
+  Memory --> Demo
+  RFC --> Demo
+  Priority --> Demo
+  Routing --> Demo
+  Confidence --> Demo
+  Adaptive["Adaptive Scheduler\nrecommendation-only capacity advice"] --> Demo
+
+  Guarded -. "default off; flag-gated" .-> LocalLog["Local Decision Log\nno GitHub mutation"]
+  Scheduler -. "unchanged by default" .-> Existing["Existing apply/automerge/repair paths"]
+
+  classDef observe fill:#eef7ff,stroke:#5b8def,color:#111;
+  classDef recommend fill:#f5f1ff,stroke:#8b5cf6,color:#111;
+  classDef simulate fill:#fff7ed,stroke:#f59e0b,color:#111;
+  classDef guarded fill:#ecfdf5,stroke:#10b981,color:#111;
+  classDef boundary fill:#f8fafc,stroke:#64748b,color:#111;
+
+  class Records,Memory observe;
+  class Priority,Routing,RFC,Promotion,Confidence,Adaptive recommend;
+  class DSL,Shadow,Metrics,Demo simulate;
+  class Guarded,LocalLog guarded;
+  class Scheduler,Planner,Existing boundary;
+```
+
 Each stage produces local documentation or generated state. Later stages consume earlier outputs, but none of the Operant Lab stages change ClawSweeper scheduler, apply, automerge, or repair behavior by default.
 
 ## 1. Records
