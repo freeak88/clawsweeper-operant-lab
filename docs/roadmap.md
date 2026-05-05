@@ -84,3 +84,13 @@ Implemented:
 - Local-records-only orchestration of Review Memory, Policy RFC, Policy DSL, Shadow Runtime, and Shadow Metrics artifacts
 - Markdown and JSON report output under `results/demo-report/<repo-slug>/`
 - No GitHub API calls, guarded execution, issue closing, PR merging, repair dispatch, or scheduler/apply/automerge behavior change
+
+## v0.8 — Autonomous Improvement Loop
+
+Implemented:
+
+- Operational weakness detection from local planning/status-like and Operant Lab signals
+- Structured improvement proposals for scheduler, routing, policy, memory, review, and repair categories
+- Deterministic shadow simulations for hypothetical impact estimates
+- Proposal-ready guarded PR suggestions without creating PRs
+- No GitHub mutation, autonomous merge, scheduler mutation, repair dispatch, runtime self-modification, or apply/automerge behavior change

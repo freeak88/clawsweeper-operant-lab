@@ -148,6 +148,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Shadow Runtime
 - Guarded Execution
 - Demo Report Generator
+- Autonomous Improvement Loop
 
 Core modules:
 
@@ -159,6 +160,7 @@ Core modules:
 - [`docs/shadow-metrics.md`](docs/shadow-metrics.md)
 - [`docs/guarded-execution.md`](docs/guarded-execution.md)
 - [`docs/demo-report.md`](docs/demo-report.md)
+- [`docs/improvement-loop.md`](docs/improvement-loop.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)
