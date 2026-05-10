@@ -175,3 +175,14 @@ Implemented:
 - Deterministic next-safe-action computation
 - Explicit safety posture with all mutation paths false
 - No GitHub API calls, GitHub mutation, branch creation, commit creation, push, PR creation, scheduler mutation, or apply/automerge mutation
+
+## D1 — Dry-run Branch Creation Intent
+
+Implemented:
+
+- Artifact-only branch creation intent from a ready PR Creation Intent
+- Deterministic sanitized branch names and explicit base refs
+- Protected branch blocking for `main`, `master`, `develop`, `release/*`, and `hotfix/*`
+- Optional local refs collision detection
+- Manual next-step output for branch creation review
+- No branch creation, checkout, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change

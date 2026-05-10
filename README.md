@@ -157,6 +157,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Operator-approved PR Creation Intent
 - Supervised Patch Pipeline Demo
 - Operator Governance Dashboard
+- Dry-run Branch Creation Intent
 
 Core modules:
 
@@ -177,6 +178,7 @@ Core modules:
 - [`docs/pr-creation-intent.md`](docs/pr-creation-intent.md)
 - [`docs/supervised-patch-pipeline-demo.md`](docs/supervised-patch-pipeline-demo.md)
 - [`docs/governance-dashboard.md`](docs/governance-dashboard.md)
+- [`docs/branch-creation-intent.md`](docs/branch-creation-intent.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)
