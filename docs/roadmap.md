@@ -236,3 +236,15 @@ Implemented:
 - Dependency-injected command runner so tests do not run real commands
 - Passed, failed, blocked, needs-review, and dry-run result artifacts
 - No commit creation, push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
+
+## D6 — Commit Intent
+
+Implemented:
+
+- Reviewable commit intent package from passed isolated validation
+- Deterministic conventional commit message proposal
+- Expected files from patch proposal artifacts
+- Validation evidence from passed local validation commands
+- Rollback note from isolated application and patch rollback plan
+- Ready, blocked, and needs-review status handling
+- No staging, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
