@@ -33,6 +33,8 @@
     "governance-dashboard": "node dist/governance-dashboard/index.js",
     "branch-creation-intent": "node dist/branch-creation-intent/index.js",
     "branch-dry-run-executor": "node dist/branch-dry-run-executor/index.js",
+    "branch-guarded-executor": "node dist/branch-guarded-executor/index.js",
+    "isolated-patch-application": "node dist/isolated-patch-application/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",

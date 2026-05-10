@@ -159,6 +159,8 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Operator Governance Dashboard
 - Dry-run Branch Creation Intent
 - Guarded Branch Creation Dry-run Executor
+- Guarded Local Branch Creation
+- Isolated Patch Application
 
 Core modules:
 
@@ -181,6 +183,8 @@ Core modules:
 - [`docs/governance-dashboard.md`](docs/governance-dashboard.md)
 - [`docs/branch-creation-intent.md`](docs/branch-creation-intent.md)
 - [`docs/branch-dry-run-executor.md`](docs/branch-dry-run-executor.md)
+- [`docs/branch-guarded-executor.md`](docs/branch-guarded-executor.md)
+- [`docs/isolated-patch-application.md`](docs/isolated-patch-application.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

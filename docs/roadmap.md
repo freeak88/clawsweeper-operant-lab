@@ -198,3 +198,28 @@ Implemented:
 - Protected branch blocking for `main`, `master`, `develop`, `release/*`, and `hotfix/*`
 - Operator execution review as the next safe step
 - No git execution, branch creation, checkout, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
+
+## D3 — Guarded Local Branch Creation
+
+Implemented:
+
+- Default dry-run local branch creation executor
+- Explicit `--execute` gate for the first local Git branch metadata mutation
+- Branch intent and dry-run preview cross-checking
+- Deterministic command matching against the approved preview
+- Clean working tree, base ref, existing branch, and current branch checks
+- Mandatory rollback instruction output
+- Git runner dependency injection so tests do not execute real Git
+- No push, commit creation, PR creation, GitHub API calls, source mutation beyond local branch metadata, or scheduler/apply/automerge behavior change
+
+## D4 — Isolated Patch Application
+
+Implemented:
+
+- Default dry-run isolated patch application
+- Explicit `--execute` gate for isolated workspace application
+- Patch proposal, patch validation, and guarded branch execution cross-checking
+- Isolated workspace path checks to keep application outside the main repository
+- Dependency-injected filesystem/patch runner so tests do not modify real files
+- Simulated files, applied files, diff report, and rollback instruction output
+- No patch application to the main working tree, commit creation, push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
