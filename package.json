@@ -30,6 +30,7 @@
     "shadow-patch-execution": "node dist/shadow-patch-execution/index.js",
     "pr-creation-intent": "node dist/pr-creation-intent/index.js",
     "supervised-patch-pipeline-demo": "node dist/supervised-patch-pipeline-demo/index.js",
+    "governance-dashboard": "node dist/governance-dashboard/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",

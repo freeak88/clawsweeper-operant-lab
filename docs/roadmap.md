@@ -164,3 +164,14 @@ Implemented:
 - Happy path, blocked approval path, and needs-review validation path scenarios
 - Unified Markdown and JSON report output
 - No GitHub mutation, branch creation, commit creation, push, PR creation, patch application, source mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## Camino C — Operator Governance Dashboard
+
+Implemented:
+
+- Read-only cockpit for the Operant Lab artifact stack
+- Principle: `Evidence → Proposal → Approval → Simulation → Intent`
+- Layer summaries for evidence, proposal, approval, simulation, intent, and safety stages
+- Deterministic next-safe-action computation
+- Explicit safety posture with all mutation paths false
+- No GitHub API calls, GitHub mutation, branch creation, commit creation, push, PR creation, scheduler mutation, or apply/automerge mutation

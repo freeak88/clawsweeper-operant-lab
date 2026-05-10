@@ -156,6 +156,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Shadow Patch Execution
 - Operator-approved PR Creation Intent
 - Supervised Patch Pipeline Demo
+- Operator Governance Dashboard
 
 Core modules:
 
@@ -175,6 +176,7 @@ Core modules:
 - [`docs/shadow-patch-execution.md`](docs/shadow-patch-execution.md)
 - [`docs/pr-creation-intent.md`](docs/pr-creation-intent.md)
 - [`docs/supervised-patch-pipeline-demo.md`](docs/supervised-patch-pipeline-demo.md)
+- [`docs/governance-dashboard.md`](docs/governance-dashboard.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)
