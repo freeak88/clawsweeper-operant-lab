@@ -161,6 +161,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Guarded Branch Creation Dry-run Executor
 - Guarded Local Branch Creation
 - Isolated Patch Application
+- Local Validation Runner
 
 Core modules:
 
@@ -185,6 +186,7 @@ Core modules:
 - [`docs/branch-dry-run-executor.md`](docs/branch-dry-run-executor.md)
 - [`docs/branch-guarded-executor.md`](docs/branch-guarded-executor.md)
 - [`docs/isolated-patch-application.md`](docs/isolated-patch-application.md)
+- [`docs/local-validation-runner.md`](docs/local-validation-runner.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

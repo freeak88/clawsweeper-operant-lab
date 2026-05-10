@@ -223,3 +223,16 @@ Implemented:
 - Dependency-injected filesystem/patch runner so tests do not modify real files
 - Simulated files, applied files, diff report, and rollback instruction output
 - No patch application to the main working tree, commit creation, push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
+
+## D5 — Local Validation Runner
+
+Implemented:
+
+- Default dry-run validation runner for isolated patch workspaces
+- Explicit `--execute` gate for local validation commands
+- Isolated workspace requirement; main working tree validation is blocked
+- Validation command allowlist for build, tests, oxlint, and oxfmt checks
+- Denylist for Git, GitHub CLI/API, network, destructive, shell, SSH, SCP, and publish commands
+- Dependency-injected command runner so tests do not run real commands
+- Passed, failed, blocked, needs-review, and dry-run result artifacts
+- No commit creation, push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
