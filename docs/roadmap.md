@@ -186,3 +186,15 @@ Implemented:
 - Optional local refs collision detection
 - Manual next-step output for branch creation review
 - No branch creation, checkout, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
+
+## D2 — Guarded Branch Creation Dry-run Executor
+
+Implemented:
+
+- Artifact-only guarded command preview from a ready branch creation intent
+- Deterministic sanitized and quoted `git checkout -b` preview
+- Required `would_execute: false` output
+- Ready, blocked, and needs-review status preservation from the source intent
+- Protected branch blocking for `main`, `master`, `develop`, `release/*`, and `hotfix/*`
+- Operator execution review as the next safe step
+- No git execution, branch creation, checkout, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change

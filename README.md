@@ -158,6 +158,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Supervised Patch Pipeline Demo
 - Operator Governance Dashboard
 - Dry-run Branch Creation Intent
+- Guarded Branch Creation Dry-run Executor
 
 Core modules:
 
@@ -179,6 +180,7 @@ Core modules:
 - [`docs/supervised-patch-pipeline-demo.md`](docs/supervised-patch-pipeline-demo.md)
 - [`docs/governance-dashboard.md`](docs/governance-dashboard.md)
 - [`docs/branch-creation-intent.md`](docs/branch-creation-intent.md)
+- [`docs/branch-dry-run-executor.md`](docs/branch-dry-run-executor.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)
