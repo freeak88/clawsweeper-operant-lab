@@ -151,6 +151,11 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Autonomous Improvement Loop
 - Operator Approval Gate
 - Supervised Implementation Writer
+- Supervised Patch Generation
+- Patch Proposal Validation
+- Shadow Patch Execution
+- Operator-approved PR Creation Intent
+- Supervised Patch Pipeline Demo
 
 Core modules:
 
@@ -165,6 +170,11 @@ Core modules:
 - [`docs/improvement-loop.md`](docs/improvement-loop.md)
 - [`docs/approval-gate.md`](docs/approval-gate.md)
 - [`docs/implementation-writer.md`](docs/implementation-writer.md)
+- [`docs/patch-generation.md`](docs/patch-generation.md)
+- [`docs/patch-validation.md`](docs/patch-validation.md)
+- [`docs/shadow-patch-execution.md`](docs/shadow-patch-execution.md)
+- [`docs/pr-creation-intent.md`](docs/pr-creation-intent.md)
+- [`docs/supervised-patch-pipeline-demo.md`](docs/supervised-patch-pipeline-demo.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

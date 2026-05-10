@@ -114,3 +114,53 @@ Implemented:
 - Blocked output for non-approved, wrong-scope, missing, or malformed plans
 - Prompt sections for goal, context, scope, files, steps, tests, rollback, safety, non-goals, and final response requirements
 - No code execution, commit creation, PR creation, push, GitHub mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## A1 — Supervised Patch Generation
+
+Implemented:
+
+- Deterministic patch proposal generation from approved implementation plans
+- Markdown and JSON patch proposal artifacts
+- Optional implementation prompt context ingestion
+- Blocked output for missing, malformed, blocked, wrong-scope, or non-approved plans
+- No patch application, source mutation, commit creation, PR creation, push, merge, GitHub mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## A2 — Patch Proposal Validation
+
+Implemented:
+
+- Artifact-only validation for `patch-proposal.json`
+- Markdown and JSON validation reports
+- Blocking checks for missing tests, rollback, safety constraints, and required non-goals
+- Sensitive path detection with `needs_review` status
+- No patch application, source mutation, commit creation, PR creation, push, merge, GitHub mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## A3 — Shadow Patch Execution
+
+Implemented:
+
+- Deterministic shadow execution reports for validated patch proposals
+- Simulation of intended changes, proposed files, and tests without applying diffs or running tests
+- `simulated`, `needs_review`, and `blocked` outputs based on Patch Proposal Validation status
+- Markdown and JSON shadow execution artifacts
+- No patch application, source mutation, test execution, commit creation, PR creation, push, merge, GitHub mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## A4 — Operator-approved PR Creation Intent
+
+Implemented:
+
+- Deterministic PR creation intent artifacts from patch proposal, validation, shadow execution, and explicit operator approval
+- `ready`, `needs_review`, and `blocked` outputs
+- Required `pr_creation_intent_only` approval scope
+- Reviewable branch name, PR title, PR body, expected files, tests, and safety constraints
+- No branch creation, commit creation, push, PR creation, merge, GitHub mutation, patch application, source mutation, repair dispatch, or scheduler/apply/automerge behavior change
+
+## A5 — Supervised Patch Pipeline Demo
+
+Implemented:
+
+- Synthetic artifact-only integration demo for the supervised patch pipeline
+- End-to-end execution of approval gate, patch generation, patch validation, shadow patch execution, and PR creation intent
+- Happy path, blocked approval path, and needs-review validation path scenarios
+- Unified Markdown and JSON report output
+- No GitHub mutation, branch creation, commit creation, push, PR creation, patch application, source mutation, repair dispatch, or scheduler/apply/automerge behavior change
