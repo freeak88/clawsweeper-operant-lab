@@ -261,3 +261,17 @@ Implemented:
 - Empty file list and unsafe command blocking
 - Operator commit execution review as the next safe step
 - No staging execution, commit execution, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
+
+## D8 — Guarded Local Commit Execution
+
+Implemented:
+
+- Default dry-run guarded local commit executor
+- Explicit `--execute` gate for local `git add` and `git commit -m`
+- Commit intent and dry-run preview cross-checking
+- Deterministic command matching against the approved preview
+- Expected-file-only changed working tree constraint
+- Conventional commit message validation
+- Mandatory rollback instruction output
+- Git runner dependency injection so tests do not execute real Git
+- No push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
