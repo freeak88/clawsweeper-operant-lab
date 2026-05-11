@@ -163,6 +163,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Isolated Patch Application
 - Local Validation Runner
 - Commit Intent
+- Guarded Commit Dry-run Executor
 
 Core modules:
 
@@ -189,6 +190,7 @@ Core modules:
 - [`docs/isolated-patch-application.md`](docs/isolated-patch-application.md)
 - [`docs/local-validation-runner.md`](docs/local-validation-runner.md)
 - [`docs/commit-intent.md`](docs/commit-intent.md)
+- [`docs/commit-dry-run-executor.md`](docs/commit-dry-run-executor.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

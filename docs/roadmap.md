@@ -248,3 +248,16 @@ Implemented:
 - Rollback note from isolated application and patch rollback plan
 - Ready, blocked, and needs-review status handling
 - No staging, commit creation, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
+
+## D7 — Guarded Commit Dry-run Executor
+
+Implemented:
+
+- Artifact-only guarded command preview from a ready commit intent
+- Deterministic sanitized and quoted `git add` and `git commit -m` previews
+- Required `would_execute: false` output
+- Ready, blocked, and needs-review status preservation from the source intent
+- Conventional commit message validation
+- Empty file list and unsafe command blocking
+- Operator commit execution review as the next safe step
+- No staging execution, commit execution, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
