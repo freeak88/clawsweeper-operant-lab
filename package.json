@@ -39,6 +39,7 @@
     "commit-intent": "node dist/commit-intent/index.js",
     "commit-dry-run-executor": "node dist/commit-dry-run-executor/index.js",
     "commit-guarded-executor": "node dist/commit-guarded-executor/index.js",
+    "pr-package": "node dist/pr-package/index.js",
     "review-memory": "node dist/review-memory/index.js",
     "commit-review": "node dist/commit-sweeper.js",
     "commit-reports": "node dist/commit-sweeper.js reports",

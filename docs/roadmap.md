@@ -275,3 +275,16 @@ Implemented:
 - Mandatory rollback instruction output
 - Git runner dependency injection so tests do not execute real Git
 - No push, PR creation, GitHub API calls, or scheduler/apply/automerge behavior change
+
+## D9 — PR Package Generation
+
+Implemented:
+
+- Artifact-only PR package generator from guarded local commit execution
+- Deterministic PR title and body synthesis
+- Diff summary from isolated patch application artifacts
+- Validation evidence from local validation and commit intent artifacts
+- Rollback plan from commit execution, isolated application, and patch proposal
+- Risk notes and operator checklist for human review
+- Ready, blocked, and needs-review status handling
+- No push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
