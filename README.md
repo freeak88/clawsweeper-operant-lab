@@ -166,6 +166,7 @@ The high-level architecture is documented in [`docs/architecture.md`](docs/archi
 - Guarded Commit Dry-run Executor
 - Guarded Local Commit Execution
 - PR Package Generation
+- Manual PR Creation Guide
 
 Core modules:
 
@@ -195,6 +196,7 @@ Core modules:
 - [`docs/commit-dry-run-executor.md`](docs/commit-dry-run-executor.md)
 - [`docs/commit-guarded-executor.md`](docs/commit-guarded-executor.md)
 - [`docs/pr-package.md`](docs/pr-package.md)
+- [`docs/manual-pr-guide.md`](docs/manual-pr-guide.md)
 - [`docs/confidence-engine.md`](docs/confidence-engine.md)
 - [`docs/priority-engine.md`](docs/priority-engine.md)
 - [`docs/model-routing.md`](docs/model-routing.md)

@@ -288,3 +288,15 @@ Implemented:
 - Risk notes and operator checklist for human review
 - Ready, blocked, and needs-review status handling
 - No push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
+
+## D10 — Manual PR Creation Guide
+
+Implemented:
+
+- Artifact-only operator guide from a ready PR package
+- The system prepares; the operator decides
+- Manual review steps for branch, commit, title, and body
+- Pre-push checklist, risk acceptance checklist, rollback steps, and do-not-do list
+- Ready, blocked, and needs-review status handling
+- Explicitly defers guarded PR creation
+- No git execution, push, PR creation, GitHub API calls, source mutation, or scheduler/apply/automerge behavior change
