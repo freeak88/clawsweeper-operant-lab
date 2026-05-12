@@ -1,216 +1,150 @@
-# ClawSweeper Operant Lab Architecture
+# Architecture
 
-Operant Lab is a conservative learning layer around ClawSweeper's durable records. It converts repeated operational history into policy proposals, dry-run rules, shadow evidence, and minimal guarded decisions.
+ClawSweeper Operant Lab is a governed autonomous engineering runtime.
 
-The pipeline is intentionally staged:
+It is not an agent that acts first. It prepares, constrains, simulates, validates, and explains action before humans authorize remote consequences.
+
+## Four-Layer Model
 
 ```text
-records -> memory -> RFC -> promotion -> DSL -> shadow runtime -> metrics -> guarded execution
+Cognitive Layer
+-> Governance Layer
+-> Execution Layer
+-> Human Interface Layer
 ```
 
 ```mermaid
-flowchart LR
-  Records["Durable Records\nreviews, repairs, outcomes"] --> Memory["Review Memory\nlocal deterministic index"]
-  Scheduler["Scheduler\nexisting lanes"] --> Planner["Planner\nexisting selection"]
-  Planner --> Priority["Priority Engine\nmetadata or opt-in ordering"]
-  Planner --> Routing["Model Routing\nrecommendation metadata"]
-  Memory --> RFC["Policy RFC Engine\nrepeated pattern proposals"]
-  RFC --> Promotion["Policy Promotion\nDraft -> Candidate -> Approved"]
-  Promotion --> DSL["Policy DSL\napproved deterministic rules"]
-  Memory --> Confidence["Confidence Engine\nproposal-only confidence"]
-  DSL --> Shadow["Shadow Runtime\nwhat would happen"]
+flowchart TB
+  subgraph Cognitive["Cognitive Layer"]
+    Records["Durable records"]
+    Memory["Review Memory"]
+    Priority["Priority Engine"]
+    Routing["Model Routing"]
+    Confidence["Confidence Engine"]
+    Adaptive["Adaptive Scheduler Recommendations"]
+    RFC["Policy RFC Engine"]
+  end
+
+  subgraph Governance["Governance Layer"]
+    Promotion["Policy Promotion"]
+    DSL["Policy DSL"]
+    Shadow["Shadow Runtime"]
+    Metrics["Shadow Metrics"]
+    Approval["Approval Gate"]
+    Improve["Improvement Loop"]
+    Dashboard["Governance Dashboard"]
+    Intent["Intent Artifacts"]
+  end
+
+  subgraph Execution["Execution Layer"]
+    BranchIntent["Branch Creation Intent"]
+    BranchPreview["Branch Dry-run Executor"]
+    BranchExec["Guarded Local Branch"]
+    PatchApply["Isolated Patch Application"]
+    Validation["Local Validation"]
+    CommitIntent["Commit Intent"]
+    CommitPreview["Commit Dry-run Executor"]
+    CommitExec["Guarded Local Commit"]
+  end
+
+  subgraph Human["Human Interface Layer"]
+    PRPackage["PR Package"]
+    ManualGuide["Manual PR Guide"]
+    Demo["Demo Report"]
+    Walkthrough["Operational Walkthrough"]
+  end
+
+  Records --> Memory
+  Memory --> RFC
+  Memory --> Priority
+  Memory --> Routing
+  Memory --> Confidence
+  RFC --> Promotion
+  Promotion --> DSL
+  DSL --> Shadow
   Confidence --> Shadow
-  Shadow --> Metrics["Shadow Metrics\naccuracy and risk evidence"]
-  Metrics --> Guarded["Guarded Execution\nannotate_only / suggest_comment"]
-  Metrics --> Demo["Demo Report Generator\nhuman-readable report"]
-  Memory --> Demo
-  RFC --> Demo
-  Priority --> Demo
-  Routing --> Demo
-  Confidence --> Demo
-  Adaptive["Adaptive Scheduler\nrecommendation-only capacity advice"] --> Demo
+  Shadow --> Metrics
+  Metrics --> Approval
+  Adaptive --> Dashboard
+  Improve --> Approval
+  Approval --> Intent
+  Dashboard --> Intent
+  Intent --> BranchIntent
+  BranchIntent --> BranchPreview
+  BranchPreview --> BranchExec
+  BranchExec --> PatchApply
+  PatchApply --> Validation
+  Validation --> CommitIntent
+  CommitIntent --> CommitPreview
+  CommitPreview --> CommitExec
+  CommitExec --> PRPackage
+  PRPackage --> ManualGuide
+  PRPackage --> Demo
+  ManualGuide --> Walkthrough
 
-  Guarded -. "default off; flag-gated" .-> LocalLog["Local Decision Log\nno GitHub mutation"]
-  Scheduler -. "unchanged by default" .-> Existing["Existing apply/automerge/repair paths"]
+  ManualGuide -. "operator-owned remote action" .-> HumanDecision["Human decision"]
+  HumanDecision -. "outside current MVP" .-> Remote["Remote GitHub action"]
 
-  classDef observe fill:#eef7ff,stroke:#5b8def,color:#111;
-  classDef recommend fill:#f5f1ff,stroke:#8b5cf6,color:#111;
-  classDef simulate fill:#fff7ed,stroke:#f59e0b,color:#111;
-  classDef guarded fill:#ecfdf5,stroke:#10b981,color:#111;
+  classDef cognitive fill:#eef7ff,stroke:#2563eb,color:#111;
+  classDef governance fill:#f5f3ff,stroke:#7c3aed,color:#111;
+  classDef execution fill:#ecfdf5,stroke:#059669,color:#111;
+  classDef human fill:#fff7ed,stroke:#d97706,color:#111;
   classDef boundary fill:#f8fafc,stroke:#64748b,color:#111;
 
-  class Records,Memory observe;
-  class Priority,Routing,RFC,Promotion,Confidence,Adaptive recommend;
-  class DSL,Shadow,Metrics,Demo simulate;
-  class Guarded,LocalLog guarded;
-  class Scheduler,Planner,Existing boundary;
+  class Records,Memory,Priority,Routing,Confidence,Adaptive,RFC cognitive;
+  class Promotion,DSL,Shadow,Metrics,Approval,Improve,Dashboard,Intent governance;
+  class BranchIntent,BranchPreview,BranchExec,PatchApply,Validation,CommitIntent,CommitPreview,CommitExec execution;
+  class PRPackage,ManualGuide,Demo,Walkthrough human;
+  class HumanDecision,Remote boundary;
 ```
 
-Each stage produces local documentation or generated state. Later stages consume earlier outputs, but none of the Operant Lab stages change ClawSweeper scheduler, apply, automerge, or repair behavior by default.
-
-## 1. Records
-
-ClawSweeper already writes durable records for reviews, repairs, outcomes, status, and generated state. These records are the historical evidence source.
-
-Examples:
+## Operating Doctrine
 
 ```text
-records/<repo-slug>/items/<number>.md
-records/<repo-slug>/closed/<number>.md
-results/sweep-status/
-results/policy-rfc/
+The system prepares;
+the operator decides.
 ```
 
-Boundary: records are read as local evidence. Missing, old, or malformed records should not crash the lab pipeline.
+The lab is designed to make AI-prepared software changes observable, reviewable, reversible, and bounded.
 
-## 2. Review Memory
-
-Review Memory builds a deterministic local JSON index from durable records and generated proposals.
-
-It summarizes:
-
-- recurring labels
-- recurring review verdicts
-- recurring repair markers
-- recurring conflict types
-- recurring safe-close reasons
-- recurring automerge causes
-- Policy RFC references
-- per-item historical signals
-
-Output:
+## Artifact Flow
 
 ```text
-results/review-memory/<repo-slug>.json
+Evidence
+-> Proposal
+-> Approval
+-> Simulation
+-> Intent
+-> Governance
+-> Guarded Branch
+-> Isolated Apply
+-> Local Validation
+-> Commit Intent
+-> Commit Preview
+-> Guarded Commit
+-> PR Package
+-> Manual PR Guide
 ```
 
-Boundary: read-only indexing.
+## Boundary
 
-## 3. Policy RFC
+The architecture deliberately stops before unattended remote action.
 
-The Policy RFC Engine identifies repeated patterns and emits reviewable RFC-style proposals.
+Current MVP:
 
-Outputs:
+- local governed execution
+- human-ready remote guidance
+- no GitHub mutation
+- no push
+- no PR creation
+- no merge
 
-- human-readable Markdown RFC
-- machine-readable JSON proposal
-
-Boundary: proposal-only. RFCs do not execute rules.
-
-## 4. Promotion
-
-The Promotion Pipeline records explicit operator decisions:
+Future remote governance must preserve the same staged contract:
 
 ```text
-draft -> candidate -> approved -> rejected -> superseded
+Manual PR Guide
+-> Remote Action Intent
+-> Remote Action Dry-run
+-> Operator Approval
+-> Guarded Remote Action
 ```
-
-Every transition writes immutable event history.
-
-Output:
-
-```text
-results/policy-promotions/<proposal-id>.json
-```
-
-Boundary: lifecycle/state management only.
-
-## 5. Policy DSL
-
-The Policy DSL represents approved policy candidates as deterministic JSON rules.
-
-Supported v0.3 operators:
-
-- `equals`
-- `not_equals`
-- `includes`
-- `not_includes`
-- `exists`
-- `not_exists`
-- `gte`
-- `lte`
-
-Policy DSL actions remain dry-run. Unsupported executable actions are rejected.
-
-Boundary: dry-run evaluation only.
-
-## 6. Shadow Runtime
-
-Shadow Runtime runs approved Policy DSL rules against Review Memory records and reports what would have been proposed.
-
-Output:
-
-```text
-results/shadow-runtime/<target-repo>/<timestamp>.json
-```
-
-Boundary: reporting-only. No DSL action is executed.
-
-## 7. Shadow Metrics
-
-Shadow Metrics aggregates Shadow Runtime reports into policy-level evidence.
-
-It computes:
-
-- total matches
-- matches by policy
-- would-action counts
-- average confidence by policy
-- blocked counts
-- risk counts
-- high/low confidence match counts
-- conservative guarded-execution candidate flags
-
-Output:
-
-```text
-results/shadow-metrics/<timestamp>.json
-```
-
-Boundary: advisory analysis only.
-
-## 8. Guarded Execution
-
-Guarded Execution is the first minimal opt-in decision layer.
-
-It is:
-
-- default OFF
-- flag-gated by `CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1`
-- dry-run capable
-- fully logged
-- limited to `annotate_only` and `suggest_comment`
-
-Required gates:
-
-- policy is approved
-- shadow metrics mark it as a guarded-execution candidate
-- confidence score is at least `0.9`
-- blocked count is `0`
-- risk count is `0`
-- action is allowed
-- dry-run is explicitly disabled
-
-Output:
-
-```text
-results/guarded-execution/<timestamp>-<policy-id>-<item-number>.json
-```
-
-Boundary: local decision logging. v0.6 does not publish comments, mutate GitHub, close issues, merge PRs, dispatch repairs, modify repository state, or change scheduler/apply/automerge behavior.
-
-## Safety Invariants
-
-Across the entire Operant Lab stack:
-
-- Default OFF.
-- Proposal-first.
-- Dry-run first.
-- No GitHub mutation by default.
-- No issue closing.
-- No PR merging.
-- No repair dispatch.
-- No scheduler/apply/automerge behavior changes by default.
-- Guarded execution only supports `annotate_only` and `suggest_comment`.
-
-The architecture is deliberately incremental. Each layer must earn trust through durable evidence before any future broader execution path is considered.

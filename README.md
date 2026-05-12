@@ -1,56 +1,205 @@
 # ClawSweeper Operant Lab
 
-ClawSweeper Operant Lab is an experimental fork of ClawSweeper focused on conservative autonomous maintenance intelligence. It turns repeated review and repair signals from durable ClawSweeper records into reviewable policies, dry-run evaluations, shadow metrics, and a minimal guarded execution path.
+## Governed AI Software Operations
 
-This repository is not a replacement for ClawSweeper production behavior. It is a lab for testing how an already conservative maintenance bot can learn from its own history while staying proposal-first, dry-run-first, and auditable.
+This is not an agent that acts first.
 
-## What It Solves
+This is a governed runtime that prepares, constrains, simulates, validates, and explains action before humans authorize remote consequences.
 
-Large maintenance bots repeatedly see the same operational patterns: stale labels, recurring repair causes, repeated verdicts, predictable conflict types, and safe-close evidence. Without a formal layer, that knowledge stays buried in reports and comments.
+ClawSweeper Operant Lab is an experimental fork of ClawSweeper focused on autonomous engineering under operational control. It turns maintenance evidence into proposals, approvals, simulations, guarded local execution, and human-ready review packages.
 
-Operant Lab adds a structured pipeline:
+Core principle:
 
 ```text
-records -> review memory -> policy RFC -> promotion -> policy DSL -> shadow runtime -> metrics -> guarded execution
+The system can prepare and constrain action,
+but humans retain operational authority.
 ```
 
-The goal is to make repeated operational knowledge inspectable before it can ever affect live behavior.
+Short positioning:
 
-## Version Timeline
+```text
+Governed AI software operations.
+```
 
-- `v0.1-operant-lab`: Operant layer foundation with Policy RFC generation, Priority Engine, Review Memory, Model Routing metadata, Adaptive Scheduler recommendations, and Confidence Engine.
-- `v0.2-policy-promotion`: RFC Promotion Pipeline with Draft -> Candidate -> Approved lifecycle state.
-- `v0.3-policy-dsl-dry-run`: Executable Policy DSL Dry-Run for deterministic approved policy rules.
-- `v0.4-shadow-runtime`: Shadow Runtime Reports for running approved DSL rules against Review Memory without executing actions.
-- `v0.5-shadow-metrics`: Shadow Accuracy Metrics for policy-level confidence, risk, blocked, and candidate signals.
-- `v0.6-guarded-execution`: Minimal guarded execution safe mode, limited to local `annotate_only` and `suggest_comment` decisions.
-- `v0.7-demo-report`: Local Demo Report Generator for producing Markdown and JSON reports from repository input and local records only.
+Medium positioning:
 
-Validation notes live in [`docs/validation/`](docs/validation/).
+```text
+Autonomous engineering under operational control.
+```
 
-## Safety Model
+Long positioning:
 
-Operant Lab is designed around conservative gates:
+```text
+A governed autonomous engineering runtime that prepares, validates, simulates, executes, and packages software changes under explicit operational controls.
+```
 
-- Default OFF.
-- Proposal-first.
-- Dry-run first.
-- No GitHub mutation by default.
-- No automatic issue closing.
-- No automatic PR merging.
-- No automatic repair dispatch.
-- No scheduler, apply, or automerge behavior changes by default.
-- Guarded execution supports only `annotate_only` and `suggest_comment`.
-- Guarded execution requires `CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1`.
-- Guarded execution logs every decision under `results/guarded-execution/`.
+Current phase:
 
-Explicitly unsupported in v0.6:
+```text
+Local Governed Execution MVP
+```
 
-- closing issues
-- merging PRs
-- dispatching repairs
-- modifying repository state
-- changing ClawSweeper scheduler/apply/automerge behavior
+Current strategic focus:
+
+```text
+not more autonomy;
+more operational legibility.
+```
+
+## What Problem It Solves
+
+Most AI coding systems optimize for capability first:
+
+```text
+agent -> action
+```
+
+That creates operational risk: hidden mutation, unclear authority, weak rollback, missing audit trails, and ambiguous responsibility.
+
+Operant Lab optimizes for governed action:
+
+```text
+evidence -> proposal -> approval -> simulation -> intent -> guarded local action -> human review
+```
+
+The system is designed for teams that want agentic software maintenance without surrendering operational control.
+
+## Why It Is Different
+
+Operant Lab does not try to prove that an agent can act without supervision.
+
+It proves that an agent can prepare action inside explicit boundaries:
+
+- evidence-backed proposals
+- deterministic artifacts
+- approval records
+- shadow simulations
+- confidence and risk signals
+- isolated patch application
+- local validation
+- guarded local commit
+- rollback instructions
+- PR packages and manual guides
+
+The operator remains responsible for remote consequences.
+
+## Architecture Layers
+
+Operant Lab is easiest to understand as four layers:
+
+```text
+Cognitive Layer
+-> Governance Layer
+-> Execution Layer
+-> Human Interface Layer
+```
+
+### Cognitive Layer
+
+Reads durable maintenance history and generates structured understanding.
+
+- Review Memory
+- Priority Engine
+- Model Routing metadata
+- Adaptive Scheduler recommendations
+- Confidence Engine
+- Policy RFC Engine
+
+### Governance Layer
+
+Turns understanding into reviewable decisions and simulations.
+
+- Policy Promotion
+- Policy DSL
+- Shadow Runtime
+- Shadow Metrics
+- Approval Gate
+- Governance Dashboard
+- Improvement Loop
+- Intent artifacts
+
+### Execution Layer
+
+Allows tightly constrained local action only after previews, approvals, and checks.
+
+- Branch Creation Intent
+- Branch Dry-run Executor
+- Guarded Local Branch Creation
+- Isolated Patch Application
+- Local Validation Runner
+- Commit Intent
+- Commit Dry-run Executor
+- Guarded Local Commit Execution
+
+### Human Interface Layer
+
+Explains what happened and prepares human-owned remote action.
+
+- PR Package Generation
+- Manual PR Creation Guide
+- Demo Report Generator
+- Operational walkthroughs
+
+See [docs/architecture.md](docs/architecture.md) for the full diagram.
+
+## Local Governed Execution MVP
+
+The current MVP covers the local governed change lifecycle:
+
+```text
+Evidence
+-> Proposal
+-> Approval
+-> Simulation
+-> Intent
+-> Governance
+-> Guarded Branch
+-> Isolated Apply
+-> Local Validation
+-> Commit Intent
+-> Commit Preview
+-> Guarded Commit
+-> PR Package
+-> Manual PR Guide
+```
+
+The system can prepare and execute a local change under constraints, validate it, create a guarded local commit, and produce a human-ready PR package and manual PR guide.
+
+It does not push, create PRs, merge, mutate GitHub, or perform unattended remote action.
+
+See [docs/local-governed-execution-mvp.md](docs/local-governed-execution-mvp.md).
+
+## Operational Guarantees
+
+Operant Lab is built around conservative guarantees:
+
+- default dry-run behavior
+- explicit execution gates
+- isolated execution where patches are applied
+- deterministic generated artifacts
+- approval boundaries
+- rollback instructions
+- local-only guarded execution
+- human-reviewed remote action
+- no hidden GitHub mutation
+- no scheduler/apply/automerge changes by default
+
+See [docs/safety-guarantees.md](docs/safety-guarantees.md).
+
+## Intentionally Not Automated
+
+These are intentionally deferred:
+
+- autonomous merge
+- unattended remote mutation
+- remote PR creation
+- autonomous remote push
+- hidden GitHub actions
+- production deployment automation
+- self-modifying execution policy
+- GitHub mutation without explicit future approval
+
+This is part of the product stance, not a missing feature.
 
 ## Quickstart
 
@@ -62,7 +211,13 @@ pnpm install
 pnpm run build
 ```
 
-For a local dry-run tour, see [`docs/demo.md`](docs/demo.md).
+Run the local governed execution docs:
+
+- [Architecture](docs/architecture.md)
+- [Local Governed Execution MVP](docs/local-governed-execution-mvp.md)
+- [Safety Guarantees](docs/safety-guarantees.md)
+- [Operational Walkthrough](docs/operational-walkthrough.md)
+- [Demo Guide](docs/demo.md)
 
 ## Main Commands
 
@@ -78,152 +233,89 @@ Generate Policy RFCs:
 pnpm run policy-rfc -- --target-repo openclaw/openclaw
 ```
 
-Promote a policy proposal:
+Run Shadow Runtime and metrics:
 
 ```bash
-pnpm run policy-promote -- --proposal <proposal.json> --to candidate --reason "repeated stable pattern"
-pnpm run policy-promote -- --proposal <proposal.json> --to approved --reason "operator approved"
+pnpm run shadow-runtime -- --policies policies --memory results/review-memory/openclaw-openclaw.json
+pnpm run shadow-metrics -- --reports results/shadow-runtime/openclaw-openclaw
 ```
 
-Run Policy DSL dry-run:
-
-```bash
-pnpm run policy-dsl -- --policy <policy.json> --memory <review-memory.json>
-```
-
-Run Shadow Runtime:
-
-```bash
-pnpm run shadow-runtime -- --policies <policy-dir> --memory <review-memory.json>
-```
-
-Analyze Shadow Metrics:
-
-```bash
-pnpm run shadow-metrics -- --reports <shadow-report-dir>
-```
-
-Generate a local demo report:
+Generate a demo report:
 
 ```bash
 pnpm run demo-report -- --repo https://github.com/openclaw/openclaw
 ```
 
-Run Guarded Execution in dry-run mode:
+Run governance dashboard:
 
 ```bash
-pnpm run guarded-execution -- \
-  --policy <policy.json> \
-  --metrics <shadow-metrics.json> \
-  --confidence <confidence.json> \
-  --item-number 42 \
-  --dry-run true
+pnpm run governance-dashboard -- --input-root results --output-root results/governance-dashboard
 ```
 
-Run Guarded Execution safe mode for local annotation decisions:
+Run the local execution handoff stages:
 
 ```bash
-CLAWSWEEPER_ENABLE_GUARDED_EXECUTION=1 pnpm run guarded-execution -- \
-  --policy <policy.json> \
-  --metrics <shadow-metrics.json> \
-  --confidence <confidence.json> \
-  --item-number 42 \
-  --dry-run false
+pnpm run branch-creation-intent -- --pr-intent <path> --output-root <path> --base-ref main
+pnpm run branch-dry-run-executor -- --branch-intent <path> --output-root <path>
+pnpm run branch-guarded-executor -- --branch-intent <path> --preview <path> --output-root <path>
+pnpm run isolated-patch-application -- --patch <path> --validation <path> --branch-execution <path> --output-root <path>
+pnpm run local-validation-runner -- --application <path> --patch <path> --output-root <path>
+pnpm run commit-intent -- --validation <path> --application <path> --patch <path> --output-root <path>
+pnpm run commit-dry-run-executor -- --commit-intent <path> --output-root <path>
+pnpm run commit-guarded-executor -- --commit-intent <path> --preview <path> --output-root <path>
+pnpm run pr-package -- --commit-execution <path> --commit-intent <path> --validation <path> --application <path> --patch <path> --output-root <path>
+pnpm run manual-pr-guide -- --pr-package <path> --branch-intent <path> --commit-execution <path> --output-root <path>
 ```
 
-## Architecture
+Commands with execution capability remain dry-run by default and require explicit `--execute`.
 
-The high-level architecture is documented in [`docs/architecture.md`](docs/architecture.md).
+## Documentation Map
 
-## Autonomous Operant Layers
+Product and architecture:
 
-- Priority Engine
-- Review Memory
-- Policy RFC Engine
-- Policy Promotion
-- Policy DSL
-- Model Routing
-- Adaptive Scheduler
-- Confidence Engine
-- Shadow Runtime
-- Guarded Execution
-- Demo Report Generator
-- Autonomous Improvement Loop
-- Operator Approval Gate
-- Supervised Implementation Writer
-- Supervised Patch Generation
-- Patch Proposal Validation
-- Shadow Patch Execution
-- Operator-approved PR Creation Intent
-- Supervised Patch Pipeline Demo
-- Operator Governance Dashboard
-- Dry-run Branch Creation Intent
-- Guarded Branch Creation Dry-run Executor
-- Guarded Local Branch Creation
-- Isolated Patch Application
-- Local Validation Runner
-- Commit Intent
-- Guarded Commit Dry-run Executor
-- Guarded Local Commit Execution
-- PR Package Generation
-- Manual PR Creation Guide
+- [Product Consolidation](PRODUCT_CONSOLIDATION.md)
+- [Architecture](docs/architecture.md)
+- [Local Governed Execution MVP](docs/local-governed-execution-mvp.md)
+- [Safety Guarantees](docs/safety-guarantees.md)
+- [Operational Walkthrough](docs/operational-walkthrough.md)
+- [Governance Dashboard](docs/governance-dashboard.md)
 
-Core modules:
+Core layers:
 
-- [`docs/review-memory.md`](docs/review-memory.md)
-- [`docs/policy-rfc-engine.md`](docs/policy-rfc-engine.md)
-- [`docs/policy-promotion.md`](docs/policy-promotion.md)
-- [`docs/policy-dsl.md`](docs/policy-dsl.md)
-- [`docs/shadow-runtime.md`](docs/shadow-runtime.md)
-- [`docs/shadow-metrics.md`](docs/shadow-metrics.md)
-- [`docs/guarded-execution.md`](docs/guarded-execution.md)
-- [`docs/demo-report.md`](docs/demo-report.md)
-- [`docs/improvement-loop.md`](docs/improvement-loop.md)
-- [`docs/approval-gate.md`](docs/approval-gate.md)
-- [`docs/implementation-writer.md`](docs/implementation-writer.md)
-- [`docs/patch-generation.md`](docs/patch-generation.md)
-- [`docs/patch-validation.md`](docs/patch-validation.md)
-- [`docs/shadow-patch-execution.md`](docs/shadow-patch-execution.md)
-- [`docs/pr-creation-intent.md`](docs/pr-creation-intent.md)
-- [`docs/supervised-patch-pipeline-demo.md`](docs/supervised-patch-pipeline-demo.md)
-- [`docs/governance-dashboard.md`](docs/governance-dashboard.md)
-- [`docs/branch-creation-intent.md`](docs/branch-creation-intent.md)
-- [`docs/branch-dry-run-executor.md`](docs/branch-dry-run-executor.md)
-- [`docs/branch-guarded-executor.md`](docs/branch-guarded-executor.md)
-- [`docs/isolated-patch-application.md`](docs/isolated-patch-application.md)
-- [`docs/local-validation-runner.md`](docs/local-validation-runner.md)
-- [`docs/commit-intent.md`](docs/commit-intent.md)
-- [`docs/commit-dry-run-executor.md`](docs/commit-dry-run-executor.md)
-- [`docs/commit-guarded-executor.md`](docs/commit-guarded-executor.md)
-- [`docs/pr-package.md`](docs/pr-package.md)
-- [`docs/manual-pr-guide.md`](docs/manual-pr-guide.md)
-- [`docs/confidence-engine.md`](docs/confidence-engine.md)
-- [`docs/priority-engine.md`](docs/priority-engine.md)
-- [`docs/model-routing.md`](docs/model-routing.md)
-- [`docs/adaptive-scheduler.md`](docs/adaptive-scheduler.md)
+- [Review Memory](docs/review-memory.md)
+- [Policy RFC Engine](docs/policy-rfc-engine.md)
+- [Policy Promotion](docs/policy-promotion.md)
+- [Policy DSL](docs/policy-dsl.md)
+- [Shadow Runtime](docs/shadow-runtime.md)
+- [Shadow Metrics](docs/shadow-metrics.md)
+- [Confidence Engine](docs/confidence-engine.md)
+- [Guarded Execution](docs/guarded-execution.md)
+- [Branch Creation Intent](docs/branch-creation-intent.md)
+- [Isolated Patch Application](docs/isolated-patch-application.md)
+- [Local Validation Runner](docs/local-validation-runner.md)
+- [Commit Intent](docs/commit-intent.md)
+- [Guarded Local Commit Execution](docs/commit-guarded-executor.md)
+- [PR Package](docs/pr-package.md)
+- [Manual PR Guide](docs/manual-pr-guide.md)
 
-Original ClawSweeper operational docs remain available under [`docs/`](docs/), including scheduler and repair internals.
+## Current Boundaries
 
-## Current Limitations
+The lab does not change default ClawSweeper scheduler, apply, automerge, repair, or GitHub mutation paths.
 
-- Guarded execution does not publish GitHub comments; it writes local decision logs only.
-- Only `annotate_only` and `suggest_comment` are allowed in guarded execution.
-- Policy DSL execution remains dry-run/reporting-first.
-- Promotion requires explicit operator intent.
-- Shadow metrics identify candidates; they do not promote or execute policies.
-- Demo reports read local records only and make no GitHub API calls.
-- The lab does not change default ClawSweeper scheduler, apply, automerge, repair, or GitHub mutation paths.
-- Historical data quality depends on available durable records and generated state.
+Remote action remains operator-owned.
 
 ## Roadmap
 
-Near-term work should stay conservative:
+Near-term work should focus on product clarity and governed remote-intent design, not broadening autonomy.
 
-- richer sample fixtures and demo datasets
-- operator review UI or report bundles for promoted policies
-- stricter schema validation for policy DSL and confidence inputs
-- optional comment-publication experiments behind separate flags
-- manual approval gates before any broader guarded execution
-- continued proof that scheduler/apply/automerge behavior remains unchanged unless explicitly wired
+The next responsible layer is a dry-run Remote Governance Layer:
 
-The detailed roadmap is in [`docs/roadmap.md`](docs/roadmap.md).
+```text
+Manual PR Guide
+-> Remote Action Intent
+-> Remote Action Dry-run
+-> Operator Approval
+-> Guarded Remote Action
+```
+
+Detailed roadmap: [docs/roadmap.md](docs/roadmap.md).
